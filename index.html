@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEM PDF Manager</title>
+    
+    <!-- เรียกใช้ฟอนต์ Sarabun จาก Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- เรียกใช้ไลบรารี pdf-lib -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #d32f2f; }
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input[type="file"], input[type="text"] {
+            width: 100%; padding: 8px; box-sizing: border-box;
+            font-family: 'Sarabun', sans-serif;
+        }
+        button {
+            background-color: #1976d2; color: white;
+            border: none; padding: 10px 15px;
+            border-radius: 5px; cursor: pointer;
+            font-size: 16px; width: 100%;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #1565c0; }
+        .loading { display: none; text-align: center; margin-top: 10px; color: #ff9800; font-weight: bold; }
+        
+        /* สไตล์สำหรับโชว์รายชื่อไฟล์ (รวมไฟล์) */
+        .file-list {
+            margin-top: 10px;
+            padding: 0;
+            list-style-type: none;
+        }
+        .file-list li {
+            background: #f9f9f9;
+            margin-bottom: 5px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .delete-btn {
+            color: #d32f2f;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: #ffebee;
+        }
+
+        /* สไตล์สำหรับกล่องพรีวิว PDF (แยกไฟล์) */
+        #pdf-preview-container {
+            display: none;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background: #eee;
+        }
+
+        /* สไตล์สำหรับ Footnote ท้ายเพจ */
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🛠️ CEM PDF Manager</h1>
+
+    <!-- ส่วนที่ 1: รวมไฟล์ PDF -->
+    <div class="card">
+        <h2>📑 รวมไฟล์ (Merge PDF)</h2>
+        <div class="form-group">
+            <label>เพิ่มไฟล์ PDF (กดเพิ่มทีละไฟล์หรือหลายไฟล์ได้):</label>
+            <input type="file" id="merge-inputs" multiple accept="application/pdf">
+            <!-- จุดแสดงรายชื่อไฟล์ที่อัปโหลด -->
+            <ul id="merge-file-list" class="file-list"></ul>
+        </div>
+        <button onclick="mergePDFs()">รวมไฟล์และดาวน์โหลด</button>
+        <div id="merge-loading" class="loading">กำลังประมวลผล...</div>
+    </div>
+
+    <!-- ส่วนที่ 2: แยกไฟล์ PDF -->
+    <div class="card">
+        <h2>✂️ แยกไฟล์ (Split PDF)</h2>
+        <div class="form-group">
+            <label>เลือกไฟล์ PDF 1 ไฟล์:</label>
+            <input type="file" id="split-input" accept="application/pdf">
+        </div>
+        
+        <!-- กล่องพรีวิวไฟล์ PDF -->
+        <div id="pdf-preview-container">
+            <iframe id="pdf-preview" width="100%" height="400px" style="border: none;"></iframe>
+        </div>
+
+        <div class="form-group">
+            <label>หน้าที่ต้องการแยกออกมา (เช่น: 1, 2-5, 2,4,6):</label>
+            <input type="text" id="split-page" placeholder="ตัวอย่าง: 1 หรือ 2-5 หรือ 2,4,6,8">
+        </div>
+        <button onclick="splitPDF()">ดึงหน้า PDF และดาวน์โหลด</button>
+        <div id="split-loading" class="loading">กำลังประมวลผล...</div>
+    </div>
+
+    <!-- Footnote ท้ายเพจ -->
+    <div class="footer">
+        จัดทำโดย วัชรากร เนียมลาภ ฝ่ายบำรุงรักษาโยธา การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย
+    </div>
+
+    <script>
+        const { PDFDocument } = PDFLib;
+        
+        // -------------------------------------------------------------
+        // ตัวแปรสำหรับเก็บไฟล์ที่จะนำมารวม (Array of Files)
+        // -------------------------------------------------------------
+        let filesToMerge = [];
+
+        // -------------------------------------------------------------
+        // จัดการ UI โชว์รายชื่อไฟล์ (ฟังก์ชันรวมไฟล์)
+        // -------------------------------------------------------------
+        document.getElementById('merge-inputs').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                // นำไฟล์ที่เพิ่งเลือก ไปต่อท้าย Array เดิม
+                for (let i = 0; i < files.length; i++) {
+                    filesToMerge.push(files[i]);
+                }
+                renderMergeList();
+            }
+            // รีเซ็ตค่า input เพื่อให้เลือกไฟล์เดิมซ้ำได้ (กรณีเผลอลบแล้วอยากเพิ่มใหม่)
+            e.target.value = '';
+        });
+
+        // ฟังก์ชันวาดรายการไฟล์ และปุ่มลบ
+        function renderMergeList() {
+            const fileListContainer = document.getElementById('merge-file-list');
+            fileListContainer.innerHTML = ''; 
+            
+            filesToMerge.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${index + 1}. ${file.name}</span>
+                    <span class="delete-btn" onclick="removeFile(${index})" title="ลบไฟล์นี้">❌</span>
+                `;
+                fileListContainer.appendChild(li);
+            });
+        }
+
+        // ฟังก์ชันลบไฟล์ออกจาก Array เมื่อกดกากบาท
+        function removeFile(index) {
+            filesToMerge.splice(index, 1);
+            renderMergeList();
+        }
+
+        // -------------------------------------------------------------
+        // จัดการ UI พรีวิวไฟล์ (ฟังก์ชันแยกไฟล์)
+        // -------------------------------------------------------------
+        let previewObjectUrl = null;
+        document.getElementById('split-input').addEventListener('change', function(e) {
+            const previewContainer = document.getElementById('pdf-preview-container');
+            const previewIframe = document.getElementById('pdf-preview');
+            const file = e.target.files[0];
+
+            if (file) {
+                if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+                previewObjectUrl = URL.createObjectURL(file);
+                previewIframe.src = previewObjectUrl;
+                previewContainer.style.display = 'block';
+            } else {
+                previewIframe.src = '';
+                previewContainer.style.display = 'none';
+            }
+        });
+
+        // -------------------------------------------------------------
+        // ฟังก์ชันช่วยดาวน์โหลดไฟล์
+        // -------------------------------------------------------------
+        function downloadBlob(bytes, filename) {
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // -------------------------------------------------------------
+        // ฟังก์ชันหลัก: รวมไฟล์ PDF
+        // -------------------------------------------------------------
+        async function mergePDFs() {
+            if (filesToMerge.length < 2) return alert("กรุณาเลือกไฟล์ PDF อย่างน้อย 2 ไฟล์");
+            
+            document.getElementById('merge-loading').style.display = 'block';
+
+            try {
+                const mergedPdf = await PDFDocument.create();
+                
+                for (let i = 0; i < filesToMerge.length; i++) {
+                    const file = filesToMerge[i];
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await PDFDocument.load(arrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+
+                const pdfBytes = await mergedPdf.save();
+                downloadBlob(pdfBytes, "merged_document.pdf");
+            } catch (error) {
+                alert("เกิดข้อผิดพลาดในการรวมไฟล์: " + error.message);
+            } finally {
+                document.getElementById('merge-loading').style.display = 'none';
+            }
+        }
+
+        // -------------------------------------------------------------
+        // ฟังก์ชันแปลงรูปแบบข้อความ (เช่น 1, 2-5, 8) เป็น Array ของตัวเลข
+        // -------------------------------------------------------------
+        function parsePageNumbers(inputString, totalPages) {
+            let pages = new Set();
+            const parts = inputString.split(',');
+            
+            for (let part of parts) {
+                part = part.trim();
+                if (part.includes('-')) {
+                    const range = part.split('-');
+                    if (range.length === 2) {
+                        const start = parseInt(range[0]);
+                        const end = parseInt(range[1]);
+                        if (!isNaN(start) && !isNaN(end) && start > 0 && end >= start) {
+                            for (let i = start; i <= end; i++) {
+                                if (i <= totalPages) pages.add(i);
+                            }
+                        }
+                    }
+                } else {
+                    const num = parseInt(part);
+                    if (!isNaN(num) && num > 0 && num <= totalPages) {
+                        pages.add(num);
+                    }
+                }
+            }
+            return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        // -------------------------------------------------------------
+        // ฟังก์ชันหลัก: แยกหน้า PDF
+        // -------------------------------------------------------------
+        async function splitPDF() {
+            const file = document.getElementById('split-input').files[0];
+            const pageString = document.getElementById('split-page').value;
+
+            if (!file) return alert("กรุณาเลือกไฟล์ PDF");
+            if (!pageString) return alert("กรุณาระบุหมายเลขหน้าที่ต้องการแยก");
+
+            document.getElementById('split-loading').style.display = 'block';
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const originalPdf = await PDFDocument.load(arrayBuffer);
+                const totalPages = originalPdf.getPageCount();
+
+                // แปลงข้อความเป็น Array ตัวเลข
+                const pagesToExtract = parsePageNumbers(pageString, totalPages);
+                
+                if (pagesToExtract.length === 0) {
+                    alert(`ไม่พบหน้าที่ระบุ หรือระบุรูปแบบผิด (ไฟล์นี้มี ${totalPages} หน้า)`);
+                    return;
+                }
+
+                // กรณีเลือกหลายหน้า ให้ถามว่าจะเซฟเป็นไฟล์เดียว หรือหลายไฟล์
+                if (pagesToExtract.length > 1) {
+                    const userChoice = confirm(
+                        "คุณได้เลือกดึงหน้า PDF จำนวน " + pagesToExtract.length + " หน้า\n\n" +
+                        "👉 กดปุ่ม [OK / ตกลง] เพื่อรวมหน้าที่เลือกเป็น 'ไฟล์เดียว'\n" +
+                        "👉 กดปุ่ม [Cancel / ยกเลิก] เพื่อแยกเป็น 'หลายไฟล์' (ไฟล์ละหน้า)"
+                    );
+
+                    if (userChoice) {
+                        // แบบที่ 1: รวมเป็นไฟล์เดียว
+                        const newPdf = await PDFDocument.create();
+                        const zeroIndexedPages = pagesToExtract.map(p => p - 1); // แปลงให้เริ่มที่ index 0
+                        const copiedPages = await newPdf.copyPages(originalPdf, zeroIndexedPages);
+                        copiedPages.forEach(page => newPdf.addPage(page));
+                        
+                        const pdfBytes = await newPdf.save();
+                        downloadBlob(pdfBytes, `extracted_pages_${pagesToExtract[0]}_to_${pagesToExtract[pagesToExtract.length-1]}.pdf`);
+                    } else {
+                        // แบบที่ 2: แยกหลายไฟล์
+                        // วนลูปเซฟทีละหน้า
+                        for (let i = 0; i < pagesToExtract.length; i++) {
+                            const pageNum = pagesToExtract[i];
+                            const newPdf = await PDFDocument.create();
+                            const [copiedPage] = await newPdf.copyPages(originalPdf, [pageNum - 1]);
+                            newPdf.addPage(copiedPage);
+                            
+                            const pdfBytes = await newPdf.save();
+                            downloadBlob(pdfBytes, `page_${pageNum}.pdf`);
+                            
+                            // หน่วงเวลาเล็กน้อย 0.5 วินาที ป้องกันเบราว์เซอร์บล็อกการโหลดหลายไฟล์พร้อมกัน
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                    }
+                } else {
+                    // กรณีเลือกหน้าเดียว (แยกไฟล์เดียว)
+                    const pageNum = pagesToExtract[0];
+                    const newPdf = await PDFDocument.create();
+                    const [copiedPage] = await newPdf.copyPages(originalPdf, [pageNum - 1]);
+                    newPdf.addPage(copiedPage);
+
+                    const pdfBytes = await newPdf.save();
+                    downloadBlob(pdfBytes, `page_${pageNum}.pdf`);
+                }
+
+            } catch (error) {
+                alert("เกิดข้อผิดพลาดในการแยกไฟล์: " + error.message);
+            } finally {
+                document.getElementById('split-loading').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
