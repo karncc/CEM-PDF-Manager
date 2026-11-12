@@ -67,7 +67,7 @@ svg { flex: none; }
 .spacer { flex: 1; }
 .vsep { width: 1px; height: 22px; background: var(--border); margin: 0 6px; flex: none; }
 
-.app { display: grid; grid-template-rows: 52px 1fr; height: 100vh; height: 100dvh; }
+.app { display: grid; grid-template-rows: 52px minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); height: 100vh; height: 100dvh; width: 100%; overflow: hidden; }
 
 /* ======================= App bar ======================= */
 .appbar { display: flex; align-items: center; gap: 10px; padding: 0 10px 0 14px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
@@ -128,7 +128,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ======================= Layout ======================= */
-.main { display: flex; min-height: 0; position: relative; }
+.main { display: flex; min-height: 0; min-width: 0; position: relative; overflow: hidden; }
 .rail { width: 78px; flex: none; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 8px 6px; gap: 2px; overflow-y: auto; }
 .rail-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 2px 8px; border: 0; background: none; border-radius: 8px; color: var(--text-2); font-size: 11px; line-height: 1.25; cursor: pointer; text-align: center; }
 .rail-btn svg { width: 22px; height: 22px; }
@@ -210,7 +210,7 @@ body.has-panel .panel { display: block; }
 .thumb.active .thumb-num { color: var(--accent-text); font-weight: 700; }
 
 .viewer-wrap { flex: 1; min-width: 0; position: relative; display: flex; }
-.viewer { flex: 1; overflow: auto; position: relative; }
+.viewer { flex: 1; min-width: 0; min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; }
 #pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 24px 110px; width: max-content; min-width: 100%; position: relative; }
 .page { position: relative; background: #fff; box-shadow: var(--page-shadow); flex: none; }
 .page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
