@@ -331,6 +331,16 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 .sig-chip { position: relative; height: 62px; border: 1px solid var(--border); border-radius: 8px; background: #fff; display: grid; place-items: center; cursor: pointer; padding: 6px; }
 .sig-chip:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .sig-chip img { max-width: 100%; max-height: 100%; }
+.sig-chip.named { padding-bottom: 18px; height: 76px; }
+.sig-chip .sig-name { position: absolute; bottom: 3px; left: 6px; right: 6px; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.sig-list-lg { grid-template-columns: repeat(3, 1fr); min-height: 120px; align-content: start; }
+.sig-list-lg .sig-chip { height: 86px; }
+.sig-list-lg .sig-chip.named { height: 98px; }
+.sig-save-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.sig-save-row .check { margin: 0; }
+.sig-save-row .input { flex: 1; min-width: 160px; height: 32px; }
+.toast-act { background: rgba(255,255,255,.16); color: #fff; border: 0; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 13px; margin-left: 4px; white-space: nowrap; }
+.toast-act:hover { background: rgba(255,255,255,.28); }
 .sig-chip-del { position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--danger); color: #fff; display: none; place-items: center; cursor: pointer; padding: 0; }
 .sig-chip-del svg { width: 11px; height: 11px; stroke-width: 3; }
 .sig-chip:hover .sig-chip-del { display: grid; }
@@ -501,7 +511,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
           <button class="icon-btn" data-cmd="back" title="ส่งไปหลังสุด" data-icon="toBack" disabled></button>
           <span class="vsep"></span>
           <button class="icon-btn" data-cmd="dup" title="ทำสำเนา" data-icon="copy" disabled></button>
-          <button class="icon-btn" data-cmd="copyall" title="คัดลอกไปทุกหน้า" data-icon="layers" disabled></button>
+          <button class="icon-btn" data-cmd="copyall" title="วางตำแหน่งเดียวกันในหน้าอื่น (ระบุเลขหน้า)" data-icon="layers" disabled></button>
           <button class="icon-btn" data-cmd="del" title="ลบ" data-icon="trash" disabled></button>
         </div>
         <p class="muted small" style="margin:6px 0 0">หรือคลิกขวาที่วัตถุเพื่อเปิดเมนู</p>
@@ -845,6 +855,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
   <div class="modal-box sig-box">
     <div class="sig-top"><h3>สร้างลายเซ็น</h3><button class="icon-btn" id="sigClose" data-icon="x" title="ปิด"></button></div>
     <div class="seg">
+      <button class="sig-tab" data-tab="saved">⭐ ที่บันทึกไว้</button>
       <button class="sig-tab active" data-tab="draw">✍️ วาด</button>
       <button class="sig-tab" data-tab="type">⌨️ พิมพ์</button>
       <button class="sig-tab" data-tab="upload">🖼️ อัปโหลดรูป</button>
@@ -887,7 +898,16 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
       <label class="check"><input type="checkbox" id="sigRemoveBg" checked> ลบพื้นหลังสีขาวอัตโนมัติ</label>
     </div>
 
-    <label class="check" style="margin-top:14px"><input type="checkbox" id="sigSave" checked> บันทึกลายเซ็นนี้ไว้ใช้ครั้งต่อไป (เก็บในเบราว์เซอร์นี้เท่านั้น)</label>
+    <div class="sig-pane" data-pane="saved" hidden>
+      <p class="muted small" style="margin:0 0 10px">คลิกลายเซ็นเพื่อวางบนเอกสาร (ขนาดจะเท่ากับครั้งล่าสุดที่ใช้)</p>
+      <div class="sig-list sig-list-lg" id="sigSavedList"></div>
+    </div>
+
+    <div class="sig-save-row" id="sigSaveRow">
+      <label class="check"><input type="checkbox" id="sigSave" checked> บันทึกไว้ใช้ครั้งต่อไป</label>
+      <input type="text" class="input" id="sigLabel" placeholder="ตั้งชื่อ เช่น ลายเซ็นเต็ม / ลายเซ็นย่อ (ไม่บังคับ)" maxlength="40">
+    </div>
+    <p class="muted small" style="margin:6px 0 0" id="sigStoreNote">ลายเซ็นเก็บไว้ในเบราว์เซอร์นี้เท่านั้น (สูงสุด 12 แบบ)</p>
     <div class="modal-actions">
       <button class="btn" id="sigCancel">ยกเลิก</button>
       <button class="btn btn-primary" id="sigOk">ใช้ลายเซ็นนี้</button>
@@ -903,7 +923,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
   <hr>
   <button data-cmd="edit" data-icon="type">แก้ไขข้อความ<kbd>ดับเบิลคลิก</kbd></button>
   <button data-cmd="dup" data-icon="copy">ทำสำเนา<kbd>Ctrl+D</kbd></button>
-  <button data-cmd="copyall" data-icon="layers">คัดลอกไปทุกหน้า</button>
+  <button data-cmd="copyall" data-icon="layers">วางตำแหน่งเดียวกันในหน้าอื่น…</button>
   <hr>
   <button data-cmd="del" data-icon="trash" class="danger">ลบ<kbd>Delete</kbd></button>
 </div>
@@ -1035,8 +1055,9 @@ function parseRanges(str, n) {
 function thaiDate() { return new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }); }
 
 /* ---------- Toast / Busy / Dialog ---------- */
-function toast(msg, type = 'info', ms = 3400) {
+function toast(msg, type = 'info', ms = 3400, action = null) {
   const t = el('div', 'toast toast-' + type, `${icon(type === 'error' ? 'alert' : type === 'success' ? 'check' : 'info')}<span>${esc(msg)}</span>`);
+  if (action) { $$('#toasts .has-act').forEach(x => x.remove()); t.classList.add('has-act'); const b = el('button', 'toast-act', esc(action.label)); b.onclick = () => { t.remove(); action.fn(); }; t.append(b); }
   $('#toasts').append(t); requestAnimationFrame(() => t.classList.add('show'));
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 250); }, ms);
 }
@@ -1501,15 +1522,18 @@ function placeAt(i, e) {
     const st = S.textStyle; const size = p.kind === 'check' || p.kind === 'cross' ? Math.max(st.size, 18) : st.size;
     a = { id: uid(), type: 'text', text: p.text, font: st.font, size, color: st.color, bold: st.bold, x: px, y: py - size * LH / 2 };
   } else if (p.type === 'image') {
-    let w = Math.min(p.kind === 'signature' ? 150 : 220, pg.w * 0.5), h = w * p.h / p.w;
-    if (h > pg.h * 0.5) { h = pg.h * 0.5; w = h * p.w / p.h; }
+    const isSig = p.kind === 'signature';
+    let w = isSig ? Math.min(sigWidthFor(p.src), pg.w * 0.9) : Math.min(220, pg.w * 0.5), h = w * p.h / p.w;
+    if (h > pg.h * (isSig ? 0.9 : 0.5)) { h = pg.h * (isSig ? 0.9 : 0.5); w = h * p.w / p.h; }
     a = { id: uid(), type: 'image', src: p.src, w, h, x: px - w / 2, y: py - h / 2, opacity: 1 };
+    if (isSig) a.sig = true;
   } else {
     a = { id: uid(), type: 'rect', fill: p.fill, opacity: p.opacity, w: p.w, h: p.h, x: px - 6, y: py - p.h / 2 };
   }
   a.x = clamp(a.x, 0, Math.max(0, pg.w - 10)); a.y = clamp(a.y, 0, Math.max(0, pg.h - 10));
   pushHistory(); S.doc.annots[i].push(a); stopPlacing(); renderAnnots(i); select(a.id);
   if (a.type === 'text' && !a.text) setTimeout(() => startEditText(a, true), 40);
+  if (a.sig && S.doc.pages.length > 1) toast('วางลายเซ็นแล้ว', 'success', 7000, { label: 'ลงหน้าอื่นที่ตำแหน่งเดียวกัน…', fn: () => { select(a.id); copyToPages(); } });
 }
 
 /* ---------- การลาก / ย่อขยาย / แก้ไข ---------- */
@@ -1562,7 +1586,7 @@ function startDrag(e, a, page, annEl, mode) {
   };
   const up = () => {
     window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-    if (moved) { pushHistory(before); if (a.type === 'text') syncProps(); }
+    if (moved) { pushHistory(before); if (a.type === 'text') syncProps(); if (a.sig && mode === 'resize') rememberSigWidth(a.src, a.w); }
   };
   window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
 }
@@ -1620,16 +1644,35 @@ function onObjProp(live) {
   rerenderAnnot(f.a, f.page); if (!live) commitProp();
 }
 ['objFill', 'objOpacity'].forEach(id => { $('#' + id).addEventListener('input', () => onObjProp(true)); $('#' + id).addEventListener('change', commitProp); });
-function copyAll() {
-  const f = findAnnot(S.selected); if (!f) return;
-  pushHistory(); let n = 0;
-  S.doc.pages.forEach((pg, i) => {
-    if (i === f.page) return;
-    const c = { ...f.a, id: uid() }; delete c.srcKey;
-    c.x = clamp(c.x, 0, Math.max(0, pg.w - (c.w || 20))); c.y = clamp(c.y, 0, Math.max(0, pg.h - (c.h || 20)));
-    S.doc.annots[i].push(c); n++;
+// แสดงรายการเลขหน้าแบบย่อ เช่น [1,2,3,5] → "1-3, 5"
+function fmtPages(list) {
+  const s = [...list].sort((a, b) => a - b).map(i => i + 1), out = [];
+  for (let k = 0; k < s.length; k++) { let j = k; while (j + 1 < s.length && s[j + 1] === s[j] + 1) j++; out.push(j > k ? `${s[k]}-${s[j]}` : `${s[k]}`); k = j; }
+  return out.join(', ');
+}
+let lastCopyRange = 'ทั้งหมด';
+// วางวัตถุที่เลือก (เช่น ลายเซ็น) ลงหน้าอื่นที่ตำแหน่งเดียวกัน ตามเลขหน้าที่ระบุ
+async function copyToPages() {
+  const f = findAnnot(S.selected); if (!f) return; const n = S.doc.pages.length;
+  if (n < 2) return toast('เอกสารมีเพียงหน้าเดียว', 'error');
+  const v = await dialog({
+    title: 'วางที่ตำแหน่งเดียวกันในหน้าอื่น',
+    message: `ระบุเลขหน้า เช่น 2-5, 8 หรือพิมพ์ "ทั้งหมด"\nเอกสารมี ${n} หน้า • วัตถุนี้อยู่หน้า ${f.page + 1}`,
+    input: lastCopyRange, buttons: [{ label: 'ยกเลิก', value: null }, { label: 'วางลงหน้าที่ระบุ', value: true, primary: true }],
   });
-  renderAllAnnots(); toast(`คัดลอกไปยังอีก ${n} หน้าแล้ว`, 'success');
+  if (v == null) return; const s = v.trim();
+  const all = !s || /^(ทั้งหมด|all|\*)$/i.test(s);
+  const pages = all ? [...Array(n).keys()] : [...new Set(parseRanges(s, n).flatMap(g => g.pages))];
+  const targets = pages.filter(i => i !== f.page);
+  if (!targets.length) return toast('ไม่พบหน้าที่จะวาง — ตรวจสอบเลขหน้าอีกครั้ง', 'error');
+  lastCopyRange = s || 'ทั้งหมด';
+  pushHistory();
+  targets.forEach(i => {
+    const pg = S.doc.pages[i]; const c = { ...f.a, id: uid() }; delete c.srcKey;
+    c.x = clamp(c.x, 0, Math.max(0, pg.w - (c.w || 20))); c.y = clamp(c.y, 0, Math.max(0, pg.h - (c.h || 20)));
+    S.doc.annots[i].push(c);
+  });
+  renderAllAnnots(); toast(`วางลงอีก ${targets.length} หน้าแล้ว (หน้า ${fmtPages(targets)})`, 'success', 5000);
 }
 
 /* ---------- ลำดับชั้น (z-order) & เมนูคลิกขวา ---------- */
@@ -1651,7 +1694,7 @@ function runCmd(c) {
   if (S.selected == null) return;
   if (['front', 'forward', 'backward', 'back'].includes(c)) arrange(c);
   else if (c === 'dup') duplicateSel();
-  else if (c === 'copyall') copyAll();
+  else if (c === 'copyall') copyToPages();
   else if (c === 'del') deleteAnnot(S.selected);
   else if (c === 'edit') { const f = findAnnot(S.selected); if (f && f.a.type === 'text') startEditText(f.a, false); }
 }
@@ -2340,10 +2383,11 @@ $('#pdf2imgBtn').onclick = async () => {
    ============================================================= */
 let sigPad = null, sigTab = 'draw', sigUploadSrc = null, sigFont = 'Charm';
 const sigColor = () => $('#sigColorCustom').value;
-function openSignature() { $('#sigModal').classList.add('open'); setSigTab('draw'); }
+function openSignature() { $('#sigModal').classList.add('open'); $('#sigLabel').value = ''; renderSavedSigs(); setSigTab(getSavedSigs().length ? 'saved' : 'draw'); }
 function closeSignature() { $('#sigModal').classList.remove('open'); }
 function setSigTab(t) {
   sigTab = t; $$('.sig-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t)); $$('.sig-pane').forEach(p => p.hidden = p.dataset.pane !== t);
+  $('#sigOk').hidden = t === 'saved'; $('#sigSaveRow').hidden = t === 'saved';
   if (t === 'draw') requestAnimationFrame(initSigPad);
   if (t === 'type') { updateTypePreview(); setTimeout(() => $('#sigName').focus(), 30); }
 }
@@ -2400,28 +2444,56 @@ $('#sigOk').onclick = async () => {
     else if (sigTab === 'type') { const name = $('#sigName').value.trim(); if (!name) return toast('กรุณาพิมพ์ชื่อ', 'error'); await ensureFont(sigFont, false, name); src = renderTypedSig(name, sigFont, sigColor()); }
     else { if (!sigUploadSrc) return toast('กรุณาเลือกไฟล์รูปลายเซ็น', 'error'); src = $('#sigRemoveBg').checked ? await removeWhiteBg(sigUploadSrc) : sigUploadSrc; src = trimCanvas(await imageToCanvas(src), 4); }
     const img = await loadImg(src);
-    if ($('#sigSave').checked) saveSignature(src);
+    if ($('#sigSave').checked) saveSignature(src, $('#sigLabel').value.trim());
     closeSignature(); startPlacing({ kind: 'signature', type: 'image', src, w: img.naturalWidth, h: img.naturalHeight });
   } catch (e) { toast('สร้างลายเซ็นไม่สำเร็จ: ' + e.message, 'error'); }
 };
-const getSavedSigs = () => storage.get('cem_signatures', []);
-function saveSignature(src) {
-  const l = getSavedSigs().filter(s => s !== src); l.unshift(src);
-  if (!storage.set('cem_signatures', l.slice(0, 6))) toast('บันทึกลายเซ็นไม่สำเร็จ (พื้นที่เบราว์เซอร์เต็ม)', 'error');
-  renderSavedSigs();
+/* ---------- คลังลายเซ็น (หลายแบบ + จำขนาดที่ใช้ล่าสุด) ---------- */
+const MAX_SIGS = 12;
+const SIGMEM = { list: null, sizes: storage.get('cem_sig_sizes', {}), warned: false };
+function strHash(s) { let h = 5381; for (let i = 0; i < s.length; i += 7) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '_' + s.length; }
+function sigWidthFor(src) { return SIGMEM.sizes[strHash(src)] ?? SIGMEM.sizes._last ?? 150; }
+function rememberSigWidth(src, w) {
+  SIGMEM.sizes[strHash(src)] = Math.round(w * 10) / 10; SIGMEM.sizes._last = SIGMEM.sizes[strHash(src)];
+  const keys = Object.keys(SIGMEM.sizes).filter(k => k !== '_last'); if (keys.length > 60) delete SIGMEM.sizes[keys[0]];
+  storage.set('cem_sig_sizes', SIGMEM.sizes);
+}
+const normSig = s => typeof s === 'string' ? { src: s, name: '' } : s;
+function getSavedSigs() { return SIGMEM.list || storage.get('cem_signatures', []).map(normSig); }
+function setSavedSigs(l) {
+  if (storage.set('cem_signatures', l)) { SIGMEM.list = null; return; }
+  SIGMEM.list = l;   // บันทึกถาวรไม่ได้ (เช่น โหมดส่วนตัว / พื้นที่เต็ม) → เก็บไว้จนกว่าจะปิดหน้านี้
+  if (!SIGMEM.warned) { SIGMEM.warned = true; toast('เบราว์เซอร์ไม่อนุญาตให้บันทึกถาวร — ลายเซ็นจะอยู่จนกว่าจะปิดหน้านี้', 'info', 5000); }
+}
+function saveSignature(src, name) {
+  const l = getSavedSigs().filter(s => s.src !== src); l.unshift({ src, name: name || '' });
+  if (l.length > MAX_SIGS) toast(`เก็บได้สูงสุด ${MAX_SIGS} แบบ — ลบลายเซ็นที่เก่าที่สุดออกแล้ว`);
+  setSavedSigs(l.slice(0, MAX_SIGS)); renderSavedSigs();
+}
+async function placeSavedSig(s) {
+  const img = await loadImg(s.src); closeSignature();
+  startPlacing({ kind: 'signature', type: 'image', src: s.src, w: img.naturalWidth, h: img.naturalHeight });
 }
 function renderSavedSigs() {
-  const box = $('#savedSigs'); const l = getSavedSigs(); box.innerHTML = '';
-  if (!l.length) { box.innerHTML = '<p class="muted small" style="grid-column:1/-1;margin:0">ยังไม่มี — สร้างได้จากปุ่ม "ลายเซ็น"</p>'; return; }
-  l.forEach((s, k) => {
-    const b = el('div', 'sig-chip', `<img src="${s}" alt="ลายเซ็น ${k + 1}"><button class="sig-chip-del" title="ลบลายเซ็นนี้">${icon('x')}</button>`);
-    b.title = 'คลิกเพื่อวางลายเซ็นนี้';
-    b.onclick = async e => {
-      if (e.target.closest('.sig-chip-del')) { storage.set('cem_signatures', getSavedSigs().filter(x => x !== s)); renderSavedSigs(); return; }
-      const img = await loadImg(s); startPlacing({ kind: 'signature', type: 'image', src: s, w: img.naturalWidth, h: img.naturalHeight });
-    };
-    box.append(b);
+  const l = getSavedSigs();
+  [$('#savedSigs'), $('#sigSavedList')].forEach(box => {
+    box.innerHTML = '';
+    if (!l.length) { box.innerHTML = '<p class="muted small" style="grid-column:1/-1;margin:0">ยังไม่มีลายเซ็นที่บันทึกไว้ — สร้างได้จากปุ่ม "ลายเซ็น"</p>'; return; }
+    l.forEach((s, k) => {
+      const b = el('div', 'sig-chip' + (s.name ? ' named' : ''), `<img src="${s.src}" alt="${esc(s.name || 'ลายเซ็น ' + (k + 1))}">${s.name ? `<span class="sig-name">${esc(s.name)}</span>` : ''}<button class="sig-chip-del" title="ลบลายเซ็นนี้">${icon('x')}</button>`);
+      b.title = (s.name ? s.name + ' — ' : '') + 'คลิกเพื่อวางลายเซ็นนี้';
+      b.onclick = async e => {
+        if (e.target.closest('.sig-chip-del')) {
+          const ok = await dialog({ title: 'ลบลายเซ็นนี้?', message: s.name || `ลายเซ็นแบบที่ ${k + 1}`, buttons: [{ label: 'ยกเลิก', value: false }, { label: 'ลบ', value: true, danger: true }] });
+          if (ok) { setSavedSigs(getSavedSigs().filter(x => x.src !== s.src)); renderSavedSigs(); }
+          return;
+        }
+        placeSavedSig(s);
+      };
+      box.append(b);
+    });
   });
+  const tab = $('.sig-tab[data-tab="saved"]'); if (tab) tab.textContent = `⭐ ที่บันทึกไว้${l.length ? ` (${l.length})` : ''}`;
 }
 
 /* =============================================================
