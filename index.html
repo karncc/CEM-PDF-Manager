@@ -102,6 +102,8 @@ svg { flex: none; }
 .icon-btn.active { background: var(--accent-soft); color: var(--accent-text); }
 .icon-btn svg { width: 20px; height: 20px; }
 .only-mobile { display: none !important; }
+.lang-btn { padding: 0 10px; min-width: 46px; font-size: 13px; letter-spacing: .03em; border: 1px solid var(--border-strong); height: 30px; border-radius: 15px; }
+html[lang="en"] .sheet.blank::after { content: 'Blank page'; }
 
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .field > span, .field-label { font-size: 12px; color: var(--text-2); font-weight: 500; }
@@ -436,6 +438,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
       <span class="vsep"></span>
       <button class="btn btn-ghost" id="btnOpen" title="เปิดไฟล์ (Ctrl+O)" data-icon="folder"><span class="btn-label">เปิด</span></button>
       <button class="icon-btn" id="btnPrint" title="พิมพ์ (Ctrl+P)" data-icon="printer" disabled></button>
+      <button class="btn btn-ghost lang-btn" id="btnLang" title="Language / ภาษา">EN</button>
       <button class="icon-btn" id="btnTheme" title="สลับโหมดมืด/สว่าง"></button>
       <button class="btn btn-primary" id="btnDownload" title="ดาวน์โหลด (Ctrl+S)" data-icon="download" disabled><span class="btn-label">ดาวน์โหลด</span></button>
     </div>
@@ -447,9 +450,9 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
       <button class="rail-btn active" data-tool="home" data-icon="home"><span>หน้าหลัก</span></button>
       <div class="rail-sep"></div>
       <button class="rail-btn" data-tool="view" data-icon="eye"><span>ดูเอกสาร</span></button>
-      <button class="rail-btn" data-tool="edit" data-icon="pen"><span>แก้ไข<br>&amp; ลงนาม</span></button>
-      <button class="rail-btn" data-tool="stamp" data-icon="droplet"><span>ลายน้ำ<br>&amp; เลขหน้า</span></button>
-      <button class="rail-btn" data-tool="organize" data-icon="grid"><span>จัดระเบียบ<br>หน้า</span></button>
+      <button class="rail-btn" data-tool="edit" data-icon="pen"><span data-en="Edit<br>&amp; Sign">แก้ไข<br>&amp; ลงนาม</span></button>
+      <button class="rail-btn" data-tool="stamp" data-icon="droplet"><span data-en="Watermark<br>&amp; Page #">ลายน้ำ<br>&amp; เลขหน้า</span></button>
+      <button class="rail-btn" data-tool="organize" data-icon="grid"><span data-en="Organize<br>Pages">จัดระเบียบ<br>หน้า</span></button>
       <button class="rail-btn" data-tool="combine" data-icon="layers"><span>รวมไฟล์</span></button>
       <button class="rail-btn" data-tool="split" data-icon="scissors"><span>แยกไฟล์</span></button>
       <button class="rail-btn" data-tool="convert" data-icon="convert"><span>แปลงไฟล์</span></button>
@@ -519,7 +522,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
         <div class="sec-title">ลายเซ็นที่บันทึกไว้</div>
         <div class="sig-list" id="savedSigs"></div>
 
-        <div class="note">
+        <div class="note" data-en="<b>Tips</b><br>• Double-click text to edit it<br>• Overlapping objects: right-click, or <b>Ctrl+]</b> / <b>Ctrl+[</b> to change layer order<br>• Press <b>Delete</b> to remove, arrow keys to nudge<br>• System fonts (e.g. TH SarabunPSK) must be installed on this computer<br>• Text is embedded into the file when you click &quot;Download&quot;">
           <b>เคล็ดลับ</b><br>
           • ดับเบิลคลิกที่ข้อความเพื่อแก้ไข<br>
           • วัตถุซ้อนกัน: คลิกขวา หรือ <b>Ctrl+]</b> / <b>Ctrl+[</b> เพื่อเลื่อนลำดับชั้น<br>
@@ -559,8 +562,8 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
               <input type="text" class="input" id="pnFormat" value="หน้า {n} / {total}">
               <div class="chips">
                 <button class="chip" data-fmt="{n}">1</button>
-                <button class="chip" data-fmt="หน้า {n}">หน้า 1</button>
-                <button class="chip" data-fmt="หน้า {n} / {total}">หน้า 1 / 9</button>
+                <button class="chip" data-fmt="หน้า {n}" data-fmt-en="Page {n}">หน้า 1</button>
+                <button class="chip" data-fmt="หน้า {n} / {total}" data-fmt-en="Page {n} of {total}">หน้า 1 / 9</button>
                 <button class="chip" data-fmt="- {n} -">- 1 -</button>
                 <button class="chip" data-fmt="Page {n} of {total}">Page 1 of 9</button>
               </div>
@@ -589,7 +592,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
         </div>
 
         <button class="btn btn-primary btn-block" id="stampApply" data-icon="check">นำไปใช้กับเอกสาร</button>
-        <div class="note">ลายน้ำและเลขหน้าจะถูกใส่ลงทุกหน้าของเอกสาร หากไม่พอใจกด <b>เลิกทำ</b> (Ctrl+Z) ได้</div>
+        <div class="note" data-en="Watermarks and page numbers are added to every page. Not happy? Press <b>Undo</b> (Ctrl+Z).">ลายน้ำและเลขหน้าจะถูกใส่ลงทุกหน้าของเอกสาร หากไม่พอใจกด <b>เลิกทำ</b> (Ctrl+Z) ได้</div>
       </div>
 
       <!-- จัดระเบียบ -->
@@ -603,7 +606,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
           <button class="btn btn-primary btn-block" id="orgApply" data-icon="check">นำการเปลี่ยนแปลงไปใช้</button>
           <button class="btn btn-block" id="orgReset" data-icon="undo">ยกเลิกการเปลี่ยนแปลงทั้งหมด</button>
         </div>
-        <div class="note">
+        <div class="note" data-en="<b>How to use</b><br>• Click to select, <b>Ctrl/⌘</b>+click to select several, <b>Shift</b>+click to select a range<br>• Drag and drop to move pages<br>• Inserted files go after the selected page (or at the end)<br>• Drop PDF files here to insert them right away">
           <b>วิธีใช้</b><br>
           • คลิกเพื่อเลือก, <b>Ctrl/⌘</b>+คลิก เลือกหลายหน้า, <b>Shift</b>+คลิก เลือกเป็นช่วง<br>
           • ลากและวางเพื่อย้ายตำแหน่ง<br>
@@ -654,7 +657,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
           <button class="btn btn-primary btn-block" id="cmbRun" data-icon="layers">รวมไฟล์</button>
           <button class="btn btn-ghost btn-block" id="cmbClear">ล้างรายการ</button>
         </div>
-        <div class="note">ไฟล์ที่รวมแล้วจะเปิดขึ้นมาให้ตรวจสอบ แก้ไขต่อ หรือกด <b>ดาวน์โหลด</b> ได้ทันที</div>
+        <div class="note" data-en="The combined file opens so you can check it, keep editing, or click <b>Download</b> right away.">ไฟล์ที่รวมแล้วจะเปิดขึ้นมาให้ตรวจสอบ แก้ไขต่อ หรือกด <b>ดาวน์โหลด</b> ได้ทันที</div>
       </div>
 
       <!-- แปลงไฟล์ -->
@@ -1052,7 +1055,7 @@ function parseRanges(str, n) {
   }
   return out;
 }
-function thaiDate() { return new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }); }
+function thaiDate() { return new Date().toLocaleDateString(I18N.lang === 'en' ? 'en-GB' : 'th-TH', { year: 'numeric', month: 'long', day: 'numeric' }); }
 
 /* ---------- Toast / Busy / Dialog ---------- */
 function toast(msg, type = 'info', ms = 3400, action = null) {
@@ -1658,7 +1661,7 @@ async function copyToPages() {
   const v = await dialog({
     title: 'วางที่ตำแหน่งเดียวกันในหน้าอื่น',
     message: `ระบุเลขหน้า เช่น 2-5, 8 หรือพิมพ์ "ทั้งหมด"\nเอกสารมี ${n} หน้า • วัตถุนี้อยู่หน้า ${f.page + 1}`,
-    input: lastCopyRange, buttons: [{ label: 'ยกเลิก', value: null }, { label: 'วางลงหน้าที่ระบุ', value: true, primary: true }],
+    input: /^(ทั้งหมด|all)$/i.test(lastCopyRange) ? (I18N.lang === 'en' ? 'all' : 'ทั้งหมด') : lastCopyRange, buttons: [{ label: 'ยกเลิก', value: null }, { label: 'วางลงหน้าที่ระบุ', value: true, primary: true }],
   });
   if (v == null) return; const s = v.trim();
   const all = !s || /^(ทั้งหมด|all|\*)$/i.test(s);
@@ -2010,7 +2013,7 @@ function refreshStampPreview() {
   stampTimer = setTimeout(async () => { await Promise.all([ensureFont($('#wmFont').value, $('#wmBold').checked, $('#wmText').value), ensureFont($('#pnFont').value, false)]); wmCache.key = null; renderAllAnnots(); }, 90);
 }
 $$('[data-panel="stamp"] input, [data-panel="stamp"] select').forEach(i => i.addEventListener('input', refreshStampPreview));
-$$('[data-panel="stamp"] [data-fmt]').forEach(c => c.onclick = () => { $('#pnFormat').value = c.dataset.fmt; refreshStampPreview(); });
+$$('[data-panel="stamp"] [data-fmt]').forEach(c => c.onclick = () => { $('#pnFormat').value = (I18N.lang === 'en' && c.dataset.fmtEn) || c.dataset.fmt; refreshStampPreview(); });
 async function applyStamp() {
   if (!$('#wmOn').checked && !$('#pnOn').checked) return toast('กรุณาเปิดใช้ลายน้ำหรือเลขหน้าก่อน', 'error');
   await busy('กำลังใส่ลายน้ำ/เลขหน้า...');
@@ -2405,7 +2408,7 @@ $('#sigWidth').addEventListener('input', applyPenWidth);
 $('#sigClear').onclick = () => sigPad && sigPad.clear();
 $$('.sig-tab').forEach(b => b.onclick = () => setSigTab(b.dataset.tab));
 $('#sigClose').onclick = closeSignature; $('#sigCancel').onclick = closeSignature;
-function updateTypePreview() { const p = $('#sigTypePreview'); p.textContent = $('#sigName').value || 'ลายเซ็นของคุณ'; p.style.fontFamily = `'${sigFont}', cursive`; p.style.color = sigColor(); p.style.opacity = $('#sigName').value ? 1 : 0.35; }
+function updateTypePreview() { const p = $('#sigTypePreview'); p.textContent = $('#sigName').value || tr('ลายเซ็นของคุณ'); p.style.fontFamily = `'${sigFont}', cursive`; p.style.color = sigColor(); p.style.opacity = $('#sigName').value ? 1 : 0.35; }
 $('#sigName').addEventListener('input', updateTypePreview);
 $$('#sigFonts button').forEach(b => b.onclick = () => { sigFont = b.dataset.font; $$('#sigFonts button').forEach(x => x.classList.toggle('active', x === b)); updateTypePreview(); });
 $('#sigUploadBtn').onclick = () => { $('#sigUploadPicker').value = ''; $('#sigUploadPicker').click(); };
@@ -2553,7 +2556,217 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('beforeunload', e => { if (S.doc && S.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
+/* =============================================================
+   ภาษา (ไทย / English)
+   หลักการ: UI เขียนเป็นภาษาไทยทั้งหมด แล้วแปลข้อความใน DOM เป็นภาษาอังกฤษ
+   อัตโนมัติด้วยพจนานุกรม (รวมถึงข้อความที่สร้างขึ้นภายหลัง ผ่าน MutationObserver)
+   ============================================================= */
+const TH_RE = /[฀-๿]/;
+const EN = {
+  // แถบบน & เครื่องมือ
+  'หน้าหลัก': 'Home', 'ดูเอกสาร': 'View', 'รวมไฟล์': 'Combine', 'แยกไฟล์': 'Split', 'แปลงไฟล์': 'Convert',
+  'แผงเครื่องมือ': 'Tools panel', 'คลิกเพื่อเปลี่ยนชื่อไฟล์': 'Click to rename file', 'มีการแก้ไขที่ยังไม่ได้ดาวน์โหลด': 'Unsaved changes',
+  'เลิกทำ (Ctrl+Z)': 'Undo (Ctrl+Z)', 'ทำซ้ำ (Ctrl+Shift+Z)': 'Redo (Ctrl+Shift+Z)', 'เปิดไฟล์ (Ctrl+O)': 'Open file (Ctrl+O)', 'เปิด': 'Open',
+  'พิมพ์ (Ctrl+P)': 'Print (Ctrl+P)', 'สลับโหมดมืด/สว่าง': 'Toggle dark/light mode', 'ดาวน์โหลด (Ctrl+S)': 'Download (Ctrl+S)', 'ดาวน์โหลด': 'Download', 'เลิกทำ': 'Undo',
+  // แก้ไข & ลงนาม
+  'แก้ไข & ลงนาม': 'Edit & Sign', 'แก้ไขเนื้อหาเดิม หรือเพิ่มข้อความ ลายเซ็น รูปภาพ ลงบนเอกสาร': 'Edit existing content, or add text, signatures and images to the document.',
+  'แก้ไขข้อความ & วัตถุเดิม': 'Edit existing text & objects',
+  'คลิกข้อความหรือรูปภาพที่มีอยู่ในเอกสารเพื่อแก้ไข ย้าย หรือลบ — หรือลากคลุมพื้นที่ใดก็ได้เพื่อย้าย/ลบส่วนนั้น': 'Click existing text or images to edit, move or delete them — or drag over any area to move/delete it.',
+  'เพิ่มเนื้อหาใหม่': 'Add new content', 'ข้อความ': 'Text', 'ลายเซ็น': 'Signature', 'รูปภาพ': 'Image', 'วันที่': 'Date', 'เครื่องหมายถูก': 'Check mark',
+  'กากบาท': 'Cross', 'ปิดทับ': 'White-out', 'ไฮไลต์': 'Highlight', 'กล่องปิดทับ': 'White-out box',
+  'รูปแบบข้อความ': 'Text format', 'รูปแบบข้อความ (ที่เลือก)': 'Text format (selected)', 'ฟอนต์': 'Font', 'ขนาดตัวอักษร (pt)': 'Font size (pt)',
+  'สีข้อความ': 'Text color', 'ตัวหนา': 'Bold', 'วัตถุที่เลือก': 'Selected object', 'สีพื้น': 'Fill color',
+  'ใช้สีขาวเพื่อปิดทับข้อความเดิม': 'Use white to cover existing text', 'ความทึบ': 'Opacity',
+  'จัดเรียง & ลำดับชั้น': 'Arrange & layers', 'นำไปไว้หน้าสุด': 'Bring to front', 'นำไปข้างหน้า': 'Bring forward', 'ส่งไปข้างหลัง': 'Send backward',
+  'ส่งไปหลังสุด': 'Send to back', 'ทำสำเนา': 'Duplicate', 'วางตำแหน่งเดียวกันในหน้าอื่น (ระบุเลขหน้า)': 'Place at the same position on other pages',
+  'วางตำแหน่งเดียวกันในหน้าอื่น…': 'Place on other pages (same position)…', 'ลบ': 'Delete', 'หรือคลิกขวาที่วัตถุเพื่อเปิดเมนู': 'Or right-click an object for more options',
+  'ลายเซ็นที่บันทึกไว้': 'Saved signatures', 'แก้ไขข้อความ': 'Edit text', 'ดับเบิลคลิก': 'Double-click', 'ปรับขนาด': 'Resize',
+  'แก้ไขเนื้อหาเดิม — คลิกข้อความ/รูป หรือลากคลุมพื้นที่': 'Edit existing content — click text/images or drag over an area', 'เสร็จสิ้น': 'Done',
+  'คลิกบนหน้าเอกสารเพื่อวาง': 'Click on the page to place', 'ยกเลิก (Esc)': 'Cancel (Esc)',
+  'คลิกเพื่อย้าย/ปรับขนาด/ลบรูปภาพนี้': 'Click to move/resize/delete this image', 'คลิกเพื่อแก้ไขข้อความ': 'Click to edit this text',
+  'ฟอนต์ระบบ (ต้องติดตั้งในเครื่อง)': 'System fonts (must be installed)',
+  // ลายน้ำ & เลขหน้า
+  'ลายน้ำ & เลขหน้า': 'Watermark & Page numbers', 'เปิดใช้งาน ปรับแต่ง และดูตัวอย่างบนเอกสารได้ทันที จากนั้นกด "นำไปใช้"': 'Turn on, customize and preview on the document, then click "Apply".',
+  'ลายน้ำ': 'Watermark', 'สี': 'Color', 'มุมเอียง': 'Angle', 'ขนาด (เทียบความกว้างหน้า)': 'Size (relative to page width)', 'เลขหน้า': 'Page numbers',
+  'รูปแบบ ({n} = เลขหน้า, {total} = จำนวนหน้า)': 'Format ({n} = page number, {total} = page count)', 'หน้า 1 / 9': 'Page 1 of 9', 'ตำแหน่ง': 'Position',
+  'ด้านล่าง - กึ่งกลาง': 'Bottom - center', 'ด้านล่าง - ขวา': 'Bottom - right', 'ด้านล่าง - ซ้าย': 'Bottom - left',
+  'ด้านบน - กึ่งกลาง': 'Top - center', 'ด้านบน - ขวา': 'Top - right', 'ด้านบน - ซ้าย': 'Top - left',
+  'ขนาด (pt)': 'Size (pt)', 'ระยะขอบ (pt)': 'Margin (pt)', 'เริ่มที่': 'Start at', 'ไม่ใส่เลขหน้าในหน้าแรก (หน้าปก)': 'Skip the first page (cover)', 'นำไปใช้กับเอกสาร': 'Apply to document',
+  // จัดระเบียบ
+  'จัดระเบียบหน้า': 'Organize pages', 'ลากหน้าเพื่อสลับลำดับ หมุน ลบ แทรกหน้าว่าง หรือแทรกหน้าจากไฟล์ PDF อื่น': 'Drag pages to reorder, rotate, delete, or insert blank pages and pages from another PDF.',
+  'นำการเปลี่ยนแปลงไปใช้': 'Apply changes', 'ยกเลิกการเปลี่ยนแปลงทั้งหมด': 'Discard all changes', 'เลือกทั้งหมด': 'Select all', 'หมุนซ้าย 90°': 'Rotate left 90°',
+  'หมุนขวา 90°': 'Rotate right 90°', 'ลบหน้าที่เลือก (Delete)': 'Delete selected pages (Delete)', 'แทรกไฟล์ PDF': 'Insert PDF', 'หน้าว่าง': 'Blank page',
+  'แยกหน้าที่เลือก': 'Extract selected pages', 'ขนาดภาพย่อ': 'Thumbnail size', 'หมุนซ้าย': 'Rotate left', 'หมุนขวา': 'Rotate right', 'ลบหน้า': 'Delete page',
+  // แยกไฟล์
+  'แยกไฟล์ PDF': 'Split PDF', 'เลือกวิธีแยก แล้วดูผลลัพธ์จากป้าย "ไฟล์ 1, 2, ..." บนแต่ละหน้า': 'Choose a split method, then check the "File 1, 2, ..." labels on each page.',
+  'คลิกเลือกหน้าที่ต้องการทางขวา': 'Click the pages you want on the right', 'รวมหน้าที่เลือกเป็นไฟล์เดียว': 'Combine selected pages into one file',
+  'บันทึกหน้าที่เหลือเป็นอีกไฟล์': 'Save remaining pages as another file', 'ตามช่วงหน้า': 'By page ranges', 'หนึ่งช่วง = หนึ่งไฟล์': 'One range = one file',
+  'ทุก N หน้า': 'Every N pages', 'แบ่งเป็นไฟล์ละเท่า ๆ กัน': 'Equal-sized parts', 'ไฟล์ละ': 'Every', 'หน้า': 'pages', 'ทุกหน้าเป็นไฟล์แยก': 'One file per page',
+  '1 หน้า = 1 ไฟล์': '1 page = 1 file', 'รวมไฟล์ผลลัพธ์เป็น ZIP (เมื่อมีหลายไฟล์)': 'Bundle output as ZIP (when multiple files)', 'แยกไฟล์และดาวน์โหลด': 'Split and download',
+  'ล้างการเลือก': 'Clear selection', 'คลิกที่หน้าเพื่อเลือก': 'Click pages to select', 'คลิกเลือกหน้าที่ต้องการแยก': 'Click the pages you want to extract',
+  'พิมพ์ช่วงหน้า เช่น 1-3, 5': 'Type page ranges, e.g. 1-3, 5', 'เช่น 1-3, 4-6, 7, 8-': 'e.g. 1-3, 4-6, 7, 8-',
+  // รวมไฟล์
+  'รวมไฟล์ PDF': 'Combine PDFs', 'เพิ่มไฟล์ตั้งแต่ 2 ไฟล์ขึ้นไป ลากการ์ดเพื่อเรียงลำดับ แล้วกด "รวมไฟล์"': 'Add 2 or more files, drag the cards to reorder, then click "Combine".',
+  'เพิ่มไฟล์ PDF': 'Add PDF files', 'เพิ่มเอกสารที่เปิดอยู่': 'Add the open document', 'ยังไม่มีไฟล์': 'No files yet', 'ล้างรายการ': 'Clear list',
+  'ไฟล์': 'Files', 'ไฟล์ที่จะรวม': 'Files to combine', 'รูปภาพที่จะแปลงเป็น PDF': 'Images to convert to PDF', 'เพิ่มไฟล์': 'Add files', 'ลากไฟล์มาวางที่นี่': 'Drop files here',
+  'ลากไฟล์ PDF หลายไฟล์มาวางที่นี่ แล้วจัดลำดับก่อนรวม': 'Drop several PDF files here, then arrange them before combining',
+  'ลากรูปภาพ (JPG, PNG, WEBP) มาวางที่นี่ หนึ่งรูปจะได้หนึ่งหน้า': 'Drop images (JPG, PNG, WEBP) here — one image per page', 'นำออก': 'Remove',
+  // แปลงไฟล์
+  'แปลงรูปภาพเป็น PDF หรือส่งออกหน้าเอกสาร PDF เป็นรูปภาพ': 'Convert images to PDF, or export PDF pages as images.', 'รูปภาพ → PDF': 'Images → PDF',
+  'เพิ่มรูปภาพ': 'Add images', 'ขนาดหน้า': 'Page size', 'พอดีกับรูป': 'Fit to image', 'แนวกระดาษ': 'Orientation', 'อัตโนมัติ': 'Auto', 'แนวตั้ง': 'Portrait',
+  'แนวนอน': 'Landscape', 'ระยะขอบ': 'Margin', 'ไม่มี': 'None', 'เล็ก': 'Small', 'ใหญ่': 'Large', 'สร้าง PDF': 'Create PDF', 'PDF → รูปภาพ': 'PDF → Images',
+  'รูปแบบ': 'Format', 'ความละเอียด': 'Resolution', 'หน้า (เว้นว่าง = ทุกหน้า)': 'Pages (blank = all)', 'เช่น 1-3, 5': 'e.g. 1-3, 5',
+  'ส่งออกเป็นรูปภาพ': 'Export as images', 'เปิดไฟล์ PDF ก่อนเพื่อใช้งานส่วนนี้': 'Open a PDF first to use this section',
+  // หน้าหลัก
+  'จัดการ PDF ครบในที่เดียว': 'All your PDF tools in one place', 'ทุกอย่างประมวลผลในเบราว์เซอร์ของคุณ ไฟล์ไม่ถูกอัปโหลดไปที่ใด': 'Everything runs in your browser — files are never uploaded anywhere.',
+  'ลากไฟล์ PDF มาวางที่นี่': 'Drop a PDF file here', 'หรือ': 'or', 'เลือกไฟล์': 'Choose file', 'รองรับไฟล์ PDF และรูปภาพ (JPG, PNG, WEBP)': 'Supports PDF and images (JPG, PNG, WEBP)',
+  'เครื่องมือทั้งหมด': 'All tools', 'เพิ่มข้อความ ลายเซ็น รูปภาพ วันที่ หรือปิดทับข้อความ': 'Add text, signatures, images, dates or white-out',
+  'เรียงลำดับ หมุน ลบ แทรกหน้า หรือแทรกไฟล์อื่น': 'Reorder, rotate, delete, or insert pages and files', 'รวมหลายไฟล์เป็นไฟล์เดียว จัดลำดับได้': 'Merge multiple files into one, in any order',
+  'แยกตามหน้าที่เลือก ช่วงหน้า หรือทุก N หน้า': 'Split by selected pages, ranges, or every N pages', 'ใส่ลายน้ำและเลขหน้า พร้อมดูตัวอย่างก่อนใช้': 'Add watermarks and page numbers with a live preview',
+  'รูปภาพเป็น PDF': 'Images to PDF', 'แปลง JPG / PNG หลายรูปเป็น PDF ไฟล์เดียว': 'Turn multiple JPG / PNG images into one PDF', 'PDF เป็นรูปภาพ': 'PDF to images',
+  'ส่งออกแต่ละหน้าเป็น JPG / PNG ความละเอียดสูง': 'Export each page as a high-resolution JPG / PNG', 'อ่าน PDF ซูม เลื่อนหน้า และพิมพ์': 'Read, zoom, navigate and print PDFs',
+  'สำหรับใช้ภายในหน่วยงานเท่านั้น': 'For internal use only',
+  'จัดทำโดย นายวัชรากร เนียมลาภ แผนกออกแบบโยธา กองวิศวกรรมบำรุงรักษาโยธา ฝ่ายบำรุงรักษาโยธา การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย': 'Developed by Mr. Watcharakorn Niamlap, Civil Design Section, Civil Maintenance Engineering Division, Civil Maintenance Department, Electricity Generating Authority of Thailand (EGAT)',
+  // โปรแกรมดู & การหมุน
+  'แสดง/ซ่อนภาพย่อ': 'Show/hide thumbnails', 'หน้าก่อนหน้า': 'Previous page', 'หน้าปัจจุบัน': 'Current page', 'หน้าถัดไป': 'Next page', 'ย่อ (Ctrl -)': 'Zoom out (Ctrl -)',
+  'พอดีความกว้าง': 'Fit width', 'ขยาย (Ctrl +)': 'Zoom in (Ctrl +)', 'พอดีทั้งหน้า (Ctrl 0)': 'Fit page (Ctrl 0)', 'หมุนเอกสาร': 'Rotate document', 'ปิด': 'Close',
+  'ทั้งฉบับ': 'All pages', 'หน้านี้': 'This page', 'ระบุหน้า': 'Specific pages', 'เช่น 1-3, 5, 8': 'e.g. 1-3, 5, 8', 'มุมมองชั่วคราว': 'Temporary view',
+  '— ไม่บันทึกลงไฟล์': '— not saved to file', 'ซ้าย': 'Left', 'ขวา': 'Right', 'คืนค่า': 'Reset', 'หมุนถาวร': 'Permanent',
+  '— บันทึกลงไฟล์ (เลิกทำได้)': '— saved to file (can undo)', 'คีย์ลัดมุมมอง: Ctrl+Shift+ปุ่ม + / − (ทั้งฉบับ)': 'View shortcut: Ctrl+Shift + / − (all pages)',
+  // ลายเซ็น
+  'สร้างลายเซ็น': 'Create signature', '⭐ ที่บันทึกไว้': '⭐ Saved', '✍️ วาด': '✍️ Draw', '⌨️ พิมพ์': '⌨️ Type', '🖼️ อัปโหลดรูป': '🖼️ Upload',
+  'สีหมึก': 'Ink', 'ดำ': 'Black', 'น้ำเงินเข้ม': 'Navy', 'น้ำเงิน': 'Blue', 'แดง': 'Red', 'สีอื่น ๆ': 'Other color', 'ความหนา': 'Thickness', 'ล้าง': 'Clear',
+  'พิมพ์ชื่อของคุณ': 'Type your name', 'เลือกไฟล์รูปลายเซ็น': 'Choose signature image', 'ยังไม่ได้เลือกรูป': 'No image selected',
+  'ลบพื้นหลังสีขาวอัตโนมัติ': 'Remove white background automatically', 'คลิกลายเซ็นเพื่อวางบนเอกสาร (ขนาดจะเท่ากับครั้งล่าสุดที่ใช้)': 'Click a signature to place it (it keeps the size you last set)',
+  'บันทึกไว้ใช้ครั้งต่อไป': 'Save for next time', 'ตั้งชื่อ เช่น ลายเซ็นเต็ม / ลายเซ็นย่อ (ไม่บังคับ)': 'Name, e.g. Full signature / Initials (optional)',
+  'ลายเซ็นเก็บไว้ในเบราว์เซอร์นี้เท่านั้น (สูงสุด 12 แบบ)': 'Signatures are stored in this browser only (up to 12)', 'ใช้ลายเซ็นนี้': 'Use this signature',
+  'ยังไม่มีลายเซ็นที่บันทึกไว้ — สร้างได้จากปุ่ม "ลายเซ็น"': 'No saved signatures yet — create one with the "Signature" button', 'ลบลายเซ็นนี้': 'Delete this signature',
+  'ลบลายเซ็นนี้?': 'Delete this signature?', 'ตัวอย่างลายเซ็น': 'Signature preview', 'คลิกเพื่อวางลายเซ็นนี้': 'Click to place this signature', 'ลายเซ็นของคุณ': 'Your signature',
+  'วางลายเซ็นแล้ว': 'Signature placed', 'ลงหน้าอื่นที่ตำแหน่งเดียวกัน…': 'Add to other pages…',
+  // กล่องโต้ตอบ
+  'วางไฟล์ที่นี่': 'Drop files here', 'กำลังประมวลผล...': 'Processing...', 'ตกลง': 'OK', 'ยกเลิก': 'Cancel', 'บันทึก': 'Save', 'นำไปใช้': 'Apply',
+  'ทิ้งการเปลี่ยนแปลง': 'Discard changes', 'ไม่ใช้': "Don't apply", 'ไม่ใส่': 'Skip', 'ใส่ลงเอกสาร': 'Add to document', 'เปิดไฟล์ใหม่': 'Open new file', 'เปิดไฟล์ใหม่?': 'Open a new file?',
+  'เอกสารปัจจุบันมีการแก้ไขที่ยังไม่ได้ดาวน์โหลด หากเปิดไฟล์ใหม่ การแก้ไขจะหายไป': "The current document has changes that haven't been downloaded. Opening a new file will discard them.",
+  'เปลี่ยนชื่อไฟล์': 'Rename file', 'ชื่อนี้จะใช้ตอนดาวน์โหลด': 'This name is used when downloading', 'ยังไม่ได้นำการจัดระเบียบไปใช้': 'Page changes not applied',
+  'ต้องการนำการเปลี่ยนแปลงลำดับ/หมุน/ลบหน้าไปใช้กับเอกสารหรือไม่?': 'Apply your reorder/rotate/delete changes to the document?', 'ต้องการนำการเปลี่ยนแปลงไปใช้ก่อนหรือไม่?': 'Apply the changes first?',
+  'ยังไม่ได้นำลายน้ำ/เลขหน้าไปใช้': 'Watermark/page numbers not applied', 'ต้องการใส่ลายน้ำ/เลขหน้าที่ตั้งค่าไว้ลงในเอกสารก่อนหรือไม่?': 'Add the watermark/page numbers you set up to the document first?',
+  'วางที่ตำแหน่งเดียวกันในหน้าอื่น': 'Place at the same position on other pages', 'วางลงหน้าที่ระบุ': 'Place on these pages', 'ทั้งหมด': 'all',
+  // กำลังทำงาน
+  'กำลังเปิดไฟล์...': 'Opening file...', 'กำลังย้อนกลับ...': 'Reverting...', 'กำลังเตรียมไฟล์...': 'Preparing file...', 'กำลังเตรียมพิมพ์...': 'Preparing to print...',
+  'กำลังใส่ลายน้ำ/เลขหน้า...': 'Adding watermark/page numbers...', 'กำลังฝังองค์ประกอบลงในหน้าเอกสาร...': 'Embedding objects into the pages...', 'กำลังแทรกไฟล์...': 'Inserting file...',
+  'กำลังสร้างเอกสารใหม่...': 'Building document...', 'กำลังแยกหน้า...': 'Extracting pages...', 'กำลังแยกไฟล์...': 'Splitting...', 'กำลังสร้างไฟล์ ZIP...': 'Creating ZIP...',
+  'กำลังอ่านไฟล์...': 'Reading files...', 'กำลังอ่านรูปภาพ...': 'Reading images...', 'กำลังเตรียมเอกสาร...': 'Preparing document...', 'กำลังรวมไฟล์...': 'Combining...',
+  'กำลังสร้าง PDF...': 'Creating PDF...', 'กำลังแปลงหน้าเป็นรูปภาพ...': 'Converting pages to images...', 'กำลังแยกวัตถุ...': 'Extracting object...', 'กำลังหมุนหน้า...': 'Rotating pages...',
+  // แจ้งเตือน
+  'ดาวน์โหลดไฟล์แล้ว': 'File downloaded', 'ฝังข้อความ/ลายเซ็นลงในเอกสารแล้ว (เลิกทำได้)': 'Text/signatures embedded into the document (can undo)',
+  'ต้องเหลืออย่างน้อย 1 หน้า': 'At least 1 page must remain', 'นำการจัดระเบียบหน้าไปใช้แล้ว': 'Page changes applied', 'กรุณาเปิดใช้ลายน้ำหรือเลขหน้าก่อน': 'Turn on the watermark or page numbers first',
+  'ใส่ลายน้ำ/เลขหน้าเรียบร้อย': 'Watermark/page numbers added', 'กรุณาเลือกไฟล์ PDF': 'Please choose PDF files', 'กรุณาเลือกไฟล์รูปภาพ': 'Please choose image files',
+  'เลือกไฟล์อย่างน้อย 2 ไฟล์': 'Choose at least 2 files', 'กรุณาเพิ่มรูปภาพก่อน': 'Please add images first',
+  'สร้าง PDF จากรูปภาพแล้ว — กด "ดาวน์โหลด" เพื่อบันทึก': 'PDF created from images — click "Download" to save', 'รูปแบบช่วงหน้าไม่ถูกต้อง': 'Invalid page range',
+  'กรุณาเซ็นชื่อในกรอบก่อน': 'Please sign in the box first', 'กรุณาพิมพ์ชื่อ': 'Please type a name', 'กรุณาเลือกไฟล์รูปลายเซ็น': 'Please choose a signature image',
+  'ไม่รองรับไฟล์ประเภทนี้': 'Unsupported file type', 'ไม่สามารถอ่านไฟล์รูปภาพได้': 'Could not read the image file', 'ไฟล์นี้ถูกป้องกันด้วยรหัสผ่าน ไม่สามารถเปิดได้': 'This file is password-protected and cannot be opened',
+  'วัตถุนี้อยู่หน้าสุดแล้ว': 'This object is already at the front', 'วัตถุนี้อยู่หลังสุดแล้ว': 'This object is already at the back', 'เอกสารมีเพียงหน้าเดียว': 'The document has only one page',
+  'ไม่พบหน้าที่จะวาง — ตรวจสอบเลขหน้าอีกครั้ง': 'No pages to place on — check the page numbers', 'กรุณาระบุหน้าที่ต้องการหมุน เช่น 1-3, 5': 'Specify the pages to rotate, e.g. 1-3, 5',
+  'ลากเพื่อย้าย • ลากมุมเพื่อปรับขนาด • Delete เพื่อลบออกจากเอกสาร': 'Drag to move • drag the corner to resize • Delete to remove from the document',
+  'เบราว์เซอร์ไม่อนุญาตให้บันทึกถาวร — ลายเซ็นจะอยู่จนกว่าจะปิดหน้านี้': "This browser doesn't allow permanent storage — signatures last until you close this page",
+};
+const ERR_PREFIX = { 'เปิดไฟล์ไม่สำเร็จ': 'Could not open file', 'บันทึกไม่สำเร็จ': 'Could not save', 'พิมพ์ไม่สำเร็จ': 'Could not print', 'หมุนไม่สำเร็จ': 'Could not rotate', 'สร้างลายเซ็นไม่สำเร็จ': 'Could not create signature', 'แก้ไขไม่สำเร็จ': 'Could not edit', 'เกิดข้อผิดพลาด': 'Error' };
+const pl = (n, w) => `${n} ${w}${+n === 1 ? '' : 's'}`;
+const EN_RULES = [
+  [/^(\d+) หน้า$/, (m, n) => pl(n, 'page')],
+  [/^(\d+) หน้า \(เดิม (\d+) หน้า\)( • มีการเปลี่ยนแปลง)?$/, (m, a, b, c) => `${pl(a, 'page')} (originally ${b})${c ? ' • modified' : ''}`],
+  [/^(\d+) ไฟล์ • (?:รวม )?(\d+) หน้า$/, (m, a, b) => `${pl(a, 'file')} • ${pl(b, 'page')}`],
+  [/^เลือก (\d+) หน้า$/, (m, n) => `${n} selected`],
+  [/^จะได้ (\d+) ไฟล์( \(รวมเป็น ZIP\))?$/, (m, n, z) => `Will create ${pl(n, 'file')}${z ? ' (as ZIP)' : ''}`],
+  [/^ไฟล์ (\d+)$/, (m, n) => `File ${n}`],
+  [/^หน้า (\d+)$/, (m, n) => `Page ${n}`],
+  [/^คลิกบนหน้าเอกสารเพื่อวาง(.+)$/, (m, l) => `Click on the page to place the ${tr(l).toLowerCase()}`],
+  [/^กำลัง(รวมไฟล์|สร้างไฟล์|แปลงหน้า) (\d+) \/ (\d+)\.\.\.$/, (m, w, a, b) => `${{ 'รวมไฟล์': 'Combining file', 'สร้างไฟล์': 'Creating file', 'แปลงหน้า': 'Converting page' }[w]} ${a} / ${b}...`],
+  [/^กำลังอ่าน (.+)\.\.\.$/, (m, f) => `Reading ${f}...`],
+  [/^รวม (\d+) ไฟล์ \((\d+) หน้า\) แล้ว — กด "ดาวน์โหลด" เพื่อบันทึก$/, (m, a, b) => `Combined ${pl(a, 'file')} (${pl(b, 'page')}) — click "Download" to save`],
+  [/^วางลงอีก (\d+) หน้าแล้ว \(หน้า (.+)\)$/, (m, n, p) => `Placed on ${pl(n, 'more page')} (pages ${p})`],
+  [/^ส่งออก (\d+) รูปแล้ว$/, (m, n) => `Exported ${pl(n, 'image')}`],
+  [/^หมุน (ทั้งฉบับ|(\d+) หน้า) (180°|ไปทางขวา|ไปทางซ้าย) แล้ว$/, (m, s, n, d) => `Rotated ${n ? pl(n, 'page') : 'all pages'} ${d === '180°' ? '180°' : d === 'ไปทางขวา' ? 'right' : 'left'}`],
+  [/^อ่านไฟล์ (.+) ไม่ได้: ([\s\S]*)$/, (m, f, e) => `Could not read ${f}: ${tr(e)}`],
+  [/^เก็บได้สูงสุด (\d+) แบบ — .*$/, (m, n) => `Up to ${n} signatures can be saved — the oldest one was removed`],
+  [/^แทรก (\d+) หน้าแล้ว$/, (m, n) => `Inserted ${pl(n, 'page')}`],
+  [/^แยก (\d+) หน้าเป็นไฟล์ใหม่แล้ว$/, (m, n) => `Extracted ${pl(n, 'page')} into a new file`],
+  [/^แยกไฟล์สำเร็จ (\d+) ไฟล์$/, (m, n) => `Split into ${pl(n, 'file')}`],
+  [/^ไม่รองรับไฟล์ (.+)$/, (m, f) => `Unsupported file: ${f}`],
+  [/^ลายเซ็น(?:แบบที่)? (\d+)$/, (m, n) => `Signature ${n}`],
+  [/^ระบุเลขหน้า เช่น 2-5, 8 หรือพิมพ์ "ทั้งหมด" เอกสารมี (\d+) หน้า • วัตถุนี้อยู่หน้า (\d+)$/, (m, n, p) => `Enter page numbers, e.g. 2-5, 8, or type "all".\nThe document has ${n} pages • this object is on page ${p}`],
+  [/^(.+) — คลิกเพื่อวางลายเซ็นนี้$/, (m, n) => `${n} — click to place this signature`],
+  [/^(เปิดไฟล์ไม่สำเร็จ|บันทึกไม่สำเร็จ|พิมพ์ไม่สำเร็จ|หมุนไม่สำเร็จ|สร้างลายเซ็นไม่สำเร็จ|แก้ไขไม่สำเร็จ|เกิดข้อผิดพลาด): ([\s\S]*)$/, (m, p, r) => `${ERR_PREFIX[p]}: ${tr(r)}`],
+];
+const I18N = { lang: storage.get('cem_lang', 'th') === 'en' ? 'en' : 'th', txt: new WeakMap(), attr: new WeakMap(), html: new WeakMap() };
+const I18N_SKIP = '.annot-layer, .target-layer, #docName, .fcard-name, .sig-name, #sigTypePreview, #btnLang, script, style, [contenteditable="true"]';
+const I18N_ATTRS = ['title', 'placeholder', 'alt', 'aria-label', 'label'];
+const I18N_DEFAULTS = [['#wmText', 'สำหรับใช้ภายในหน่วยงานเท่านั้น', 'For internal use only'], ['#pnFormat', 'หน้า {n} / {total}', 'Page {n} of {total}']];
+function tr(s) {
+  if (I18N.lang !== 'en' || !s || !TH_RE.test(s)) return s;
+  const key = s.replace(/\s+/g, ' ').trim();
+  if (EN[key] != null) return EN[key];
+  for (const [re, fn] of EN_RULES) { const m = key.match(re); if (m) return fn(...m); }
+  return s;
+}
+function trText(n) {
+  const v = n.data; if (!TH_RE.test(v) || n.parentElement?.closest(I18N_SKIP)) return;
+  const t = tr(v); if (t === v) return;
+  const nv = v.match(/^\s*/)[0] + t.trim() + v.match(/\s*$/)[0];
+  I18N.txt.set(n, { th: v, en: nv }); n.data = nv;
+}
+function trAttrs(e) {
+  for (const a of I18N_ATTRS) {
+    const v = e.getAttribute(a); if (!v || !TH_RE.test(v)) continue;
+    const t = tr(v); if (t === v) continue;
+    const m = I18N.attr.get(e) || {}; m[a] = { th: v, en: t }; I18N.attr.set(e, m); e.setAttribute(a, t);
+  }
+}
+function translateTree(root) {
+  if (I18N.lang !== 'en') return;
+  if (root.nodeType === 3) return trText(root);
+  if (root.nodeType !== 1 || root.closest(I18N_SKIP)) return;
+  const visit = e => {
+    trAttrs(e);
+    if (e.dataset.en != null) { if (!I18N.html.has(e)) { I18N.html.set(e, e.innerHTML); e.innerHTML = e.dataset.en; } return false; }
+    return true;
+  };
+  if (!visit(root)) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.nodeType === 1 ? (n.matches(I18N_SKIP) || !visit(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP) : NodeFilter.FILTER_ACCEPT,
+  });
+  const texts = []; while (w.nextNode()) texts.push(w.currentNode); texts.forEach(trText);
+}
+function restoreThai() {
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT); const nodes = [];
+  while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(n => {
+    if (n.nodeType === 3) { const r = I18N.txt.get(n); if (r) { if (n.data === r.en) n.data = r.th; I18N.txt.delete(n); } return; }
+    const m = I18N.attr.get(n); if (m) { for (const a in m) if (n.getAttribute(a) === m[a].en) n.setAttribute(a, m[a].th); I18N.attr.delete(n); }
+    if (I18N.html.has(n)) { n.innerHTML = I18N.html.get(n); I18N.html.delete(n); }
+  });
+}
+new MutationObserver(ms => {
+  if (I18N.lang !== 'en') return;
+  for (const m of ms) {
+    if (m.type === 'childList') m.addedNodes.forEach(translateTree);
+    else if (m.type === 'characterData') trText(m.target);
+    else if (m.type === 'attributes' && !m.target.closest(I18N_SKIP)) trAttrs(m.target);
+  }
+}).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS });
+function setLang(l) {
+  const prev = I18N.lang; I18N.lang = l; storage.set('cem_lang', l); document.documentElement.lang = l;
+  if (l === 'en') translateTree(document.body); else if (prev === 'en') restoreThai();
+  I18N_DEFAULTS.forEach(([sel, th, en]) => { const i = $(sel); if (l === 'en' && i.value === th) i.value = en; else if (l === 'th' && i.value === en) i.value = th; });
+  $('#btnLang').textContent = l === 'en' ? 'ไทย' : 'EN';
+  $('#btnLang').title = l === 'en' ? 'เปลี่ยนเป็นภาษาไทย' : 'Switch to English';
+  if (S.tool === 'stamp') refreshStampPreview();
+  updateTypePreview();
+}
+$('#btnLang').onclick = () => setLang(I18N.lang === 'en' ? 'th' : 'en');
+
 renderSavedSigs(); syncProps(); renderList();
+setLang(I18N.lang);
 </script>
 </body>
 </html>
