@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-809cKcq4A/nKso3qCPhF7yGvbM/an8LJz94bSRG+sp4=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>CEM PDF Manager</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link referrerpolicy="no-referrer" href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha384-BSxuMLxX+FCbTdYec3TbXlnMGEEM2QXTFdtDaveen71o+jswm2J36+xFqp8k4VHM" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js" integrity="sha384-dPowQo9uxJU703klzvnG+vzLHQDNmO/zREXw6BhCMupB54CE70wj6SWOGVPySK3s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
   // ใช้ธีมที่บันทึกไว้ก่อนแสดงผล เพื่อไม่ให้หน้าจอกะพริบ
   try { const t = (localStorage.getItem('cem_theme') || '').replace(/"/g, ''); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
@@ -334,6 +336,8 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 .sig-chip { position: relative; height: 62px; border: 1px solid var(--border); border-radius: 8px; background: #fff; display: grid; place-items: center; cursor: pointer; padding: 6px; }
 .sig-chip:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .sig-chip img { max-width: 100%; max-height: 100%; }
+.sig-chip .sig-persist { position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; }
+.sig-chip .sig-persist svg { width: 10px; height: 10px; }
 .sig-chip.named { padding-bottom: 18px; height: 76px; }
 .sig-chip .sig-name { position: absolute; bottom: 3px; left: 6px; right: 6px; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
 .sig-list-lg { grid-template-columns: repeat(3, 1fr); min-height: 120px; align-content: start; }
@@ -522,6 +526,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 
         <div class="sec-title">ลายเซ็นที่บันทึกไว้</div>
         <div class="sig-list" id="savedSigs"></div>
+        <button class="btn btn-ghost sm sig-clear-all" data-icon="trash" style="margin-top:8px">ลบลายเซ็นทั้งหมด</button>
 
         <div class="note" data-en="<b>Tips</b><br>• Double-click text to edit it<br>• Overlapping objects: right-click, or <b>Ctrl+]</b> / <b>Ctrl+[</b> to change layer order<br>• Press <b>Delete</b> to remove, arrow keys to nudge<br>• System fonts (e.g. TH SarabunPSK) must be installed on this computer<br>• Text is embedded into the file when you click &quot;Download&quot;">
           <b>เคล็ดลับ</b><br>
@@ -906,13 +911,15 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
     <div class="sig-pane" data-pane="saved" hidden>
       <p class="muted small" style="margin:0 0 10px">คลิกลายเซ็นเพื่อวางบนเอกสาร (ขนาดจะเท่ากับครั้งล่าสุดที่ใช้)</p>
       <div class="sig-list sig-list-lg" id="sigSavedList"></div>
+      <button class="btn btn-ghost sm sig-clear-all" data-icon="trash" style="margin-top:10px">ลบลายเซ็นทั้งหมด</button>
     </div>
 
     <div class="sig-save-row" id="sigSaveRow">
-      <label class="check"><input type="checkbox" id="sigSave" checked> บันทึกไว้ใช้ครั้งต่อไป</label>
+      <label class="check"><input type="checkbox" id="sigSave" checked> บันทึกไว้ในคลังลายเซ็น</label>
+      <label class="check"><input type="checkbox" id="sigPersist"> จำไว้ในเครื่องนี้หลังปิดหน้า</label>
       <input type="text" class="input" id="sigLabel" placeholder="ตั้งชื่อ เช่น ลายเซ็นเต็ม / ลายเซ็นย่อ (ไม่บังคับ)" maxlength="40">
     </div>
-    <p class="muted small" style="margin:6px 0 0" id="sigStoreNote">ลายเซ็นเก็บไว้ในเบราว์เซอร์นี้เท่านั้น (สูงสุด 12 แบบ)</p>
+    <p class="muted small" style="margin:6px 0 0" id="sigStoreNote">ค่าเริ่มต้น: ลายเซ็นจะถูกลบเมื่อปิดหน้านี้ หากเลือก "จำไว้ในเครื่องนี้" ผู้อื่นที่ใช้คอมพิวเตอร์และบัญชีเดียวกันอาจเห็นได้ — ไม่ควรใช้บนเครื่องส่วนกลาง</p>
     <div class="modal-actions">
       <button class="btn" id="sigCancel">ยกเลิก</button>
       <button class="btn btn-primary" id="sigOk">ใช้ลายเซ็นนี้</button>
@@ -940,7 +947,13 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 <script>
 'use strict';
 const { PDFDocument, degrees, rgb } = PDFLib;
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+/* ตัวประมวลผล PDF (worker) — ดาวน์โหลดแล้วตรวจลายนิ้วมือ (SRI) ก่อนใช้ หากไฟล์บน CDN ถูกแก้ไขจะไม่ยอมรัน */
+const PDF_WORKER = { url: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js', integrity: 'sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2' };
+const workerReady = fetch(PDF_WORKER.url, { integrity: PDF_WORKER.integrity, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'force-cache' })
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+  .then(b => { const u = URL.createObjectURL(new Blob([b], { type: 'text/javascript' })); pdfjsLib.GlobalWorkerOptions.workerSrc = u; pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(u); })
+  .catch(e => { console.error('pdf.js worker', e); throw new Error('ไม่สามารถโหลดตัวประมวลผล PDF ที่ผ่านการตรวจสอบได้ กรุณาตรวจการเชื่อมต่ออินเทอร์เน็ตแล้วโหลดหน้าใหม่'); });
+workerReady.catch(() => {});
 
 /* =============================================================
    ไอคอน
@@ -1136,11 +1149,33 @@ function clearLazy(container) { $$('.lazy', container).forEach(t => { lazyIO.uno
 /* =============================================================
    โหลดเอกสาร
    ============================================================= */
-async function loadProxy(bytes) { return pdfjsLib.getDocument({ data: bytes.slice(), isEvalSupported: false }).promise; }
-function pdfError(e) { return e && e.name === 'PasswordException' ? 'ไฟล์นี้ถูกป้องกันด้วยรหัสผ่าน ไม่สามารถเปิดได้' : (e && e.message) || String(e); }
+/* ---------- ขีดจำกัดขนาดไฟล์ (กันเบราว์เซอร์ค้าง / ใช้หน่วยความจำเกิน) ---------- */
+const LIMITS = { pdfMB: 200, pdfWarnMB: 50, pages: 2000, pagesWarn: 500, totalMB: 400, totalPages: 3000, imageMB: 30, imagePx: 60e6 };
+const fmtMB = b => (b / 1048576).toFixed(b < 10485760 ? 1 : 0) + ' MB';
+// ตรวจขนาดก่อนอ่านไฟล์เข้าหน่วยความจำ — คืนค่า false ถ้าไม่ควรเปิด
+async function checkPdfSize(file) {
+  if (file.size > LIMITS.pdfMB * 1048576) { toast(`ไฟล์ ${file.name} มีขนาด ${fmtMB(file.size)} เกินขีดจำกัด ${LIMITS.pdfMB} MB`, 'error', 6000); return false; }
+  if (file.size > LIMITS.pdfWarnMB * 1048576) {
+    unbusy();
+    const ok = await dialog({ title: 'ไฟล์มีขนาดใหญ่', message: `ไฟล์ ${file.name} มีขนาด ${fmtMB(file.size)} อาจทำงานช้าหรือใช้หน่วยความจำสูง ต้องการเปิดต่อหรือไม่?`, buttons: [{ label: 'ยกเลิก', value: false }, { label: 'เปิดต่อ', value: true, primary: true }] });
+    return !!ok;
+  }
+  return true;
+}
+function checkPageCount(n, name) {
+  if (n > LIMITS.pages) throw new Error(`ไฟล์ ${name} มี ${n} หน้า เกินขีดจำกัด ${LIMITS.pages} หน้า`);
+  if (n > LIMITS.pagesWarn) toast(`เอกสารมี ${n} หน้า อาจทำงานช้ากว่าปกติ`, 'info', 5000);
+}
+async function loadProxy(bytes) {
+  await workerReady;
+  // isEvalSupported:false ปิดช่องโหว่ CVE-2024-4367 (ฟอนต์อันตรายรันโค้ดได้), ไม่โหลดทรัพยากรภายนอกที่อ้างในไฟล์, จำกัดขนาดรูปในไฟล์
+  return pdfjsLib.getDocument({ data: bytes.slice(), isEvalSupported: false, enableXfa: false, disableAutoFetch: true, stopAtErrors: false, maxImageSize: 100e6 }).promise;
+}
+function pdfError(e) { if (e && e.name === 'InvalidPDFException') return 'ไฟล์เสียหายหรือไม่ใช่ PDF'; return e && e.name === 'PasswordException' ? 'ไฟล์นี้ถูกป้องกันด้วยรหัสผ่าน ไม่สามารถเปิดได้' : (e && e.message) || String(e); }
 
 async function setDocument(bytes, name, { reset = false, annots = null } = {}) {
   const proxy = await loadProxy(bytes);
+  if (reset) { try { checkPageCount(proxy.numPages, name); } catch (e) { proxy.destroy(); throw e; } }
   const pages = [];
   for (let i = 1; i <= proxy.numPages; i++) { const v = (await proxy.getPage(i)).getViewport({ scale: 1 }); pages.push({ w: v.width, h: v.height }); }
   const old = S.doc;
@@ -1160,6 +1195,7 @@ async function openPdfFile(file, tool) {
     const r = await dialog({ title: 'เปิดไฟล์ใหม่?', message: 'เอกสารปัจจุบันมีการแก้ไขที่ยังไม่ได้ดาวน์โหลด หากเปิดไฟล์ใหม่ การแก้ไขจะหายไป', buttons: [{ label: 'ยกเลิก', value: false }, { label: 'เปิดไฟล์ใหม่', value: true, primary: true }] });
     if (!r) return;
   }
+  if (!(await checkPdfSize(file))) return;
   await busy('กำลังเปิดไฟล์...');
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -2133,8 +2169,10 @@ async function insertPdfFiles(files) {
   try {
     let at = insertIndex(); const added = [];
     for (const f of pdfs) {
+      if (f.size > LIMITS.pdfMB * 1048576) { toast(`ไฟล์ ${f.name} มีขนาด ${fmtMB(f.size)} เกินขีดจำกัด ${LIMITS.pdfMB} MB`, 'error', 6000); continue; }
       const bytes = new Uint8Array(await f.arrayBuffer());
       let proxy; try { proxy = await loadProxy(bytes); } catch (e) { toast(`อ่านไฟล์ ${f.name} ไม่ได้: ${pdfError(e)}`, 'error'); continue; }
+      if (O.items.length + added.length + proxy.numPages > LIMITS.totalPages) { proxy.destroy(); toast(`จำนวนหน้ารวมเกิน ${LIMITS.totalPages} หน้า — ข้ามไฟล์ ${f.name}`, 'error', 6000); continue; }
       const src = O.sources.push({ bytes, proxy, name: f.name }) - 1;
       for (let p = 0; p < proxy.numPages; p++) { const v = (await proxy.getPage(p + 1)).getViewport({ scale: 1 }); added.push({ id: uid(), src, page: p, rot: 0, rv: 0, w: v.width, h: v.height }); }
     }
@@ -2262,13 +2300,16 @@ $('#splitRun').onclick = async () => {
    ============================================================= */
 const C = { files: [] }, IMG = { items: [] };
 async function loadImageFile(file, maxDim = 4000) {
+  if (file.size > LIMITS.imageMB * 1048576) throw new Error(`รูป ${file.name} มีขนาด ${fmtMB(file.size)} เกินขีดจำกัด ${LIMITS.imageMB} MB`);
   const url = URL.createObjectURL(file);
   try {
-    const img = await loadImg(url); let w = img.naturalWidth, h = img.naturalHeight; const s = Math.min(1, maxDim / Math.max(w, h)); w = Math.round(w * s); h = Math.round(h * s);
+    const img = await loadImg(url);
+    if (img.naturalWidth * img.naturalHeight > LIMITS.imagePx) throw Object.assign(new Error(`รูป ${file.name} มีความละเอียดสูงเกินไป (${img.naturalWidth} × ${img.naturalHeight} px)`), { limit: true });
+    let w = img.naturalWidth, h = img.naturalHeight; const s = Math.min(1, maxDim / Math.max(w, h)); w = Math.round(w * s); h = Math.round(h * s);
     const c = canvasOf(w, h); c.getContext('2d').drawImage(img, 0, 0, w, h);
     const keepAlpha = file.type !== 'image/jpeg' && file.type !== 'image/jpg';
     return { src: keepAlpha ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.92), w, h };
-  } catch (e) { throw new Error(`ไม่รองรับไฟล์ ${file.name}`); }
+  } catch (e) { throw e && e.limit ? e : new Error(`ไม่รองรับไฟล์ ${file.name}`); }
   finally { URL.revokeObjectURL(url); }
 }
 async function addCombineFiles(files) {
@@ -2276,9 +2317,12 @@ async function addCombineFiles(files) {
   await busy('กำลังอ่านไฟล์...');
   try {
     for (const f of pdfs) {
+      const usedMB = C.files.reduce((t, x) => t + x.bytes.length, 0), usedPages = C.files.reduce((t, x) => t + x.pages, 0);
+      if (f.size > LIMITS.pdfMB * 1048576) { toast(`ไฟล์ ${f.name} มีขนาด ${fmtMB(f.size)} เกินขีดจำกัด ${LIMITS.pdfMB} MB`, 'error', 6000); continue; }
+      if (usedMB + f.size > LIMITS.totalMB * 1048576) { toast(`ขนาดรวมเกิน ${LIMITS.totalMB} MB — ข้ามไฟล์ ${f.name}`, 'error', 6000); continue; }
       busyText(`กำลังอ่าน ${f.name}...`);
       const bytes = new Uint8Array(await f.arrayBuffer());
-      try { const proxy = await loadProxy(bytes); const thumb = await queueThumb(proxy, 0, 240); C.files.push({ id: uid(), name: f.name, bytes, pages: proxy.numPages, thumb }); proxy.destroy(); }
+      try { const proxy = await loadProxy(bytes); if (usedPages + proxy.numPages > LIMITS.totalPages) { proxy.destroy(); toast(`จำนวนหน้ารวมเกิน ${LIMITS.totalPages} หน้า — ข้ามไฟล์ ${f.name}`, 'error', 6000); continue; } const thumb = await queueThumb(proxy, 0, 240); C.files.push({ id: uid(), name: f.name, bytes, pages: proxy.numPages, thumb }); proxy.destroy(); }
       catch (e) { toast(`อ่านไฟล์ ${f.name} ไม่ได้: ${pdfError(e)}`, 'error'); }
     }
   } finally { unbusy(); }
@@ -2388,7 +2432,7 @@ $('#pdf2imgBtn').onclick = async () => {
    ============================================================= */
 let sigPad = null, sigTab = 'draw', sigUploadSrc = null, sigFont = 'Charm';
 const sigColor = () => $('#sigColorCustom').value;
-function openSignature() { $('#sigModal').classList.add('open'); $('#sigLabel').value = ''; renderSavedSigs(); setSigTab(getSavedSigs().length ? 'saved' : 'draw'); }
+function openSignature() { $('#sigModal').classList.add('open'); $('#sigLabel').value = ''; $('#sigPersist').checked = false; renderSavedSigs(); setSigTab(getSavedSigs().length ? 'saved' : 'draw'); }
 function closeSignature() { $('#sigModal').classList.remove('open'); }
 function setSigTab(t) {
   sigTab = t; $$('.sig-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t)); $$('.sig-pane').forEach(p => p.hidden = p.dataset.pane !== t);
@@ -2449,7 +2493,7 @@ $('#sigOk').onclick = async () => {
     else if (sigTab === 'type') { const name = $('#sigName').value.trim(); if (!name) return toast('กรุณาพิมพ์ชื่อ', 'error'); await ensureFont(sigFont, false, name); src = renderTypedSig(name, sigFont, sigColor()); }
     else { if (!sigUploadSrc) return toast('กรุณาเลือกไฟล์รูปลายเซ็น', 'error'); src = $('#sigRemoveBg').checked ? await removeWhiteBg(sigUploadSrc) : sigUploadSrc; src = trimCanvas(await imageToCanvas(src), 4); }
     const img = await loadImg(src);
-    if ($('#sigSave').checked) saveSignature(src, $('#sigLabel').value.trim());
+    if ($('#sigSave').checked) saveSignature(src, $('#sigLabel').value.trim(), $('#sigPersist').checked);
     closeSignature(); startPlacing({ kind: 'signature', type: 'image', src, w: img.naturalWidth, h: img.naturalHeight });
   } catch (e) { toast('สร้างลายเซ็นไม่สำเร็จ: ' + e.message, 'error'); }
 };
@@ -2463,18 +2507,32 @@ function rememberSigWidth(src, w) {
   const keys = Object.keys(SIGMEM.sizes).filter(k => k !== '_last'); if (keys.length > 60) delete SIGMEM.sizes[keys[0]];
   storage.set('cem_sig_sizes', SIGMEM.sizes);
 }
-const normSig = s => typeof s === 'string' ? { src: s, name: '' } : s;
-function getSavedSigs() { return SIGMEM.list || storage.get('cem_signatures', []).map(normSig); }
+// ลายเซ็นเก็บในหน่วยความจำของหน้านี้เป็นค่าเริ่มต้น (หายเมื่อปิดหน้า) — บันทึกลง localStorage เฉพาะแบบที่ผู้ใช้เลือก "จำไว้ในเครื่องนี้"
+const normSig = s => typeof s === 'string' ? { src: s, name: '', persist: true } : { src: s.src, name: s.name || '', persist: true };
+SIGMEM.list = (Array.isArray(storage.get('cem_signatures', [])) ? storage.get('cem_signatures', []) : [])
+  .filter(x => x && (typeof x === 'string' || typeof x.src === 'string')).map(normSig)
+  .filter(x => /^data:image\/(png|jpeg);base64,/.test(x.src));
+function getSavedSigs() { return SIGMEM.list; }
 function setSavedSigs(l) {
-  if (storage.set('cem_signatures', l)) { SIGMEM.list = null; return; }
-  SIGMEM.list = l;   // บันทึกถาวรไม่ได้ (เช่น โหมดส่วนตัว / พื้นที่เต็ม) → เก็บไว้จนกว่าจะปิดหน้านี้
-  if (!SIGMEM.warned) { SIGMEM.warned = true; toast('เบราว์เซอร์ไม่อนุญาตให้บันทึกถาวร — ลายเซ็นจะอยู่จนกว่าจะปิดหน้านี้', 'info', 5000); }
+  SIGMEM.list = l;
+  const keep = l.filter(x => x.persist).map(x => ({ src: x.src, name: x.name }));
+  let ok = true;
+  if (keep.length) ok = storage.set('cem_signatures', keep); else { try { localStorage.removeItem('cem_signatures'); } catch (e) {} }
+  if (!ok && !SIGMEM.warned) { SIGMEM.warned = true; toast('เบราว์เซอร์ไม่อนุญาตให้บันทึกถาวร — ลายเซ็นจะอยู่จนกว่าจะปิดหน้านี้', 'info', 5000); }
 }
-function saveSignature(src, name) {
-  const l = getSavedSigs().filter(s => s.src !== src); l.unshift({ src, name: name || '' });
+function saveSignature(src, name, persist) {
+  const l = getSavedSigs().filter(s => s.src !== src); l.unshift({ src, name: name || '', persist: !!persist });
   if (l.length > MAX_SIGS) toast(`เก็บได้สูงสุด ${MAX_SIGS} แบบ — ลบลายเซ็นที่เก่าที่สุดออกแล้ว`);
   setSavedSigs(l.slice(0, MAX_SIGS)); renderSavedSigs();
 }
+async function clearAllSignatures() {
+  if (!getSavedSigs().length) return toast('ยังไม่มีลายเซ็นที่บันทึกไว้');
+  const ok = await dialog({ title: 'ลบลายเซ็นทั้งหมด?', message: 'ลายเซ็นทุกแบบ รวมถึงที่จำไว้ในเครื่องนี้ และขนาดที่จำไว้ จะถูกลบ และกู้คืนไม่ได้', buttons: [{ label: 'ยกเลิก', value: false }, { label: 'ลบทั้งหมด', value: true, danger: true }] });
+  if (!ok) return;
+  setSavedSigs([]); SIGMEM.sizes = {}; try { localStorage.removeItem('cem_signatures'); localStorage.removeItem('cem_sig_sizes'); } catch (e) {}
+  renderSavedSigs(); toast('ลบลายเซ็นทั้งหมดแล้ว', 'success');
+}
+$$('.sig-clear-all').forEach(b => b.onclick = clearAllSignatures);
 async function placeSavedSig(s) {
   const img = await loadImg(s.src); closeSignature();
   startPlacing({ kind: 'signature', type: 'image', src: s.src, w: img.naturalWidth, h: img.naturalHeight });
@@ -2485,8 +2543,8 @@ function renderSavedSigs() {
     box.innerHTML = '';
     if (!l.length) { box.innerHTML = '<p class="muted small" style="grid-column:1/-1;margin:0">ยังไม่มีลายเซ็นที่บันทึกไว้ — สร้างได้จากปุ่ม "ลายเซ็น"</p>'; return; }
     l.forEach((s, k) => {
-      const b = el('div', 'sig-chip' + (s.name ? ' named' : ''), `<img src="${s.src}" alt="${esc(s.name || 'ลายเซ็น ' + (k + 1))}">${s.name ? `<span class="sig-name">${esc(s.name)}</span>` : ''}<button class="sig-chip-del" title="ลบลายเซ็นนี้">${icon('x')}</button>`);
-      b.title = (s.name ? s.name + ' — ' : '') + 'คลิกเพื่อวางลายเซ็นนี้';
+      const b = el('div', 'sig-chip' + (s.name ? ' named' : ''), `<img src="${esc(s.src)}" alt="${esc(s.name || 'ลายเซ็น ' + (k + 1))}">${s.persist ? `<span class="sig-persist">${icon('check')}</span>` : ''}${s.name ? `<span class="sig-name">${esc(s.name)}</span>` : ''}<button class="sig-chip-del" title="ลบลายเซ็นนี้">${icon('x')}</button>`);
+      b.title = (s.name ? s.name + ' — ' : '') + (s.persist ? 'จำไว้ในเครื่องนี้ — ' : '') + 'คลิกเพื่อวางลายเซ็นนี้';
       b.onclick = async e => {
         if (e.target.closest('.sig-chip-del')) {
           const ok = await dialog({ title: 'ลบลายเซ็นนี้?', message: s.name || `ลายเซ็นแบบที่ ${k + 1}`, buttons: [{ label: 'ยกเลิก', value: false }, { label: 'ลบ', value: true, danger: true }] });
@@ -2565,6 +2623,13 @@ window.addEventListener('beforeunload', e => { if (S.doc && S.dirty) { e.prevent
    ============================================================= */
 const TH_RE = /[฀-๿]/;
 const EN = {
+  'บันทึกไว้ในคลังลายเซ็น': 'Save to signature library', 'จำไว้ในเครื่องนี้หลังปิดหน้า': 'Remember on this device after closing',
+  'ค่าเริ่มต้น: ลายเซ็นจะถูกลบเมื่อปิดหน้านี้ หากเลือก "จำไว้ในเครื่องนี้" ผู้อื่นที่ใช้คอมพิวเตอร์และบัญชีเดียวกันอาจเห็นได้ — ไม่ควรใช้บนเครื่องส่วนกลาง': 'By default, signatures are deleted when you close this page. If you choose "Remember on this device", other people using the same computer and account may see them — avoid this on shared computers.',
+  'ลบลายเซ็นทั้งหมด': 'Delete all signatures', 'ลบลายเซ็นทั้งหมด?': 'Delete all signatures?', 'ลบทั้งหมด': 'Delete all', 'ลบลายเซ็นทั้งหมดแล้ว': 'All signatures deleted',
+  'ลายเซ็นทุกแบบ รวมถึงที่จำไว้ในเครื่องนี้ และขนาดที่จำไว้ จะถูกลบ และกู้คืนไม่ได้': 'All signatures, including those remembered on this device, and their saved sizes will be deleted. This cannot be undone.',
+  'ยังไม่มีลายเซ็นที่บันทึกไว้': 'No saved signatures yet', 'จำไว้ในเครื่องนี้': 'Remembered on this device',
+  'ไฟล์มีขนาดใหญ่': 'Large file', 'เปิดต่อ': 'Open anyway', 'ไฟล์เสียหายหรือไม่ใช่ PDF': 'The file is damaged or is not a PDF',
+  'ไม่สามารถโหลดตัวประมวลผล PDF ที่ผ่านการตรวจสอบได้ กรุณาตรวจการเชื่อมต่ออินเทอร์เน็ตแล้วโหลดหน้าใหม่': 'Could not load a verified PDF engine. Check your internet connection and reload the page.',
   // แถบบน & เครื่องมือ
   'หน้าหลัก': 'Home', 'ดูเอกสาร': 'View', 'รวมไฟล์': 'Combine', 'แยกไฟล์': 'Split', 'แปลงไฟล์': 'Convert',
   'แผงเครื่องมือ': 'Tools panel', 'คลิกเพื่อเปลี่ยนชื่อไฟล์': 'Click to rename file', 'มีการแก้ไขที่ยังไม่ได้ดาวน์โหลด': 'Unsaved changes',
@@ -2676,6 +2741,14 @@ const EN = {
 const ERR_PREFIX = { 'เปิดไฟล์ไม่สำเร็จ': 'Could not open file', 'บันทึกไม่สำเร็จ': 'Could not save', 'พิมพ์ไม่สำเร็จ': 'Could not print', 'หมุนไม่สำเร็จ': 'Could not rotate', 'สร้างลายเซ็นไม่สำเร็จ': 'Could not create signature', 'แก้ไขไม่สำเร็จ': 'Could not edit', 'เกิดข้อผิดพลาด': 'Error' };
 const pl = (n, w) => `${n} ${w}${+n === 1 ? '' : 's'}`;
 const EN_RULES = [
+  [/^ไฟล์ (.+) มีขนาด ([\d.]+ MB) เกินขีดจำกัด (\d+) MB$/, (m, f, a, b) => `${f} is ${a}, over the ${b} MB limit`],
+  [/^ไฟล์ (.+) มีขนาด ([\d.]+ MB) อาจทำงานช้าหรือใช้หน่วยความจำสูง ต้องการเปิดต่อหรือไม่\?$/, (m, f, a) => `${f} is ${a}. It may be slow or use a lot of memory. Open it anyway?`],
+  [/^ไฟล์ (.+) มี (\d+) หน้า เกินขีดจำกัด (\d+) หน้า$/, (m, f, a, b) => `${f} has ${a} pages, over the ${b}-page limit`],
+  [/^เอกสารมี (\d+) หน้า อาจทำงานช้ากว่าปกติ$/, (m, n) => `The document has ${n} pages and may be slower than usual`],
+  [/^ขนาดรวมเกิน (\d+) MB — ข้ามไฟล์ (.+)$/, (m, n, f) => `Total size over ${n} MB — skipped ${f}`],
+  [/^จำนวนหน้ารวมเกิน (\d+) หน้า — ข้ามไฟล์ (.+)$/, (m, n, f) => `Total pages over ${n} — skipped ${f}`],
+  [/^รูป (.+) มีขนาด ([\d.]+ MB) เกินขีดจำกัด (\d+) MB$/, (m, f, a, b) => `Image ${f} is ${a}, over the ${b} MB limit`],
+  [/^รูป (.+) มีความละเอียดสูงเกินไป \((.+)\)$/, (m, f, d) => `Image ${f} resolution is too high (${d})`],
   [/^(\d+) หน้า$/, (m, n) => pl(n, 'page')],
   [/^(\d+) หน้า \(เดิม (\d+) หน้า\)( • มีการเปลี่ยนแปลง)?$/, (m, a, b, c) => `${pl(a, 'page')} (originally ${b})${c ? ' • modified' : ''}`],
   [/^(\d+) ไฟล์ • (?:รวม )?(\d+) หน้า$/, (m, a, b) => `${pl(a, 'file')} • ${pl(b, 'page')}`],
@@ -2698,7 +2771,7 @@ const EN_RULES = [
   [/^ไม่รองรับไฟล์ (.+)$/, (m, f) => `Unsupported file: ${f}`],
   [/^ลายเซ็น(?:แบบที่)? (\d+)$/, (m, n) => `Signature ${n}`],
   [/^ระบุเลขหน้า เช่น 2-5, 8 หรือพิมพ์ "ทั้งหมด" เอกสารมี (\d+) หน้า • วัตถุนี้อยู่หน้า (\d+)$/, (m, n, p) => `Enter page numbers, e.g. 2-5, 8, or type "all".\nThe document has ${n} pages • this object is on page ${p}`],
-  [/^(.+) — คลิกเพื่อวางลายเซ็นนี้$/, (m, n) => `${n} — click to place this signature`],
+  [/^(?:(.+?) — )?(จำไว้ในเครื่องนี้ — )?คลิกเพื่อวางลายเซ็นนี้$/, (m, n, r) => `${n ? n + ' — ' : ''}${r ? 'Remembered on this device — ' : ''}${n || r ? 'click' : 'Click'} to place this signature`],
   [/^(เปิดไฟล์ไม่สำเร็จ|บันทึกไม่สำเร็จ|พิมพ์ไม่สำเร็จ|หมุนไม่สำเร็จ|สร้างลายเซ็นไม่สำเร็จ|แก้ไขไม่สำเร็จ|เกิดข้อผิดพลาด): ([\s\S]*)$/, (m, p, r) => `${ERR_PREFIX[p]}: ${tr(r)}`],
 ];
 const I18N = { lang: storage.get('cem_lang', 'th') === 'en' ? 'en' : 'th', txt: new WeakMap(), attr: new WeakMap(), html: new WeakMap() };
