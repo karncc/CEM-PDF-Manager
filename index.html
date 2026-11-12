@@ -213,7 +213,18 @@ body.has-panel .panel { display: block; }
 .viewer { flex: 1; min-width: 0; min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; }
 #pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 24px 110px; width: max-content; min-width: 100%; position: relative; }
 .page { position: relative; background: #fff; box-shadow: var(--page-shadow); flex: none; }
+.page-inner { position: absolute; left: 50%; top: 50%; background: #fff; transform-origin: center center; transition: transform .2s; }
 .page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.rot-pop { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 30; width: 320px; max-width: calc(100% - 24px); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--pop-shadow); padding: 14px; }
+.rot-pop h4 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
+.rot-pop .seg { margin-bottom: 8px; }
+.rot-pop .seg button { font-size: 12.5px; padding: 6px 4px; }
+.rot-sec { margin-top: 12px; }
+.rot-sec-title { font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.rot-sec-title small { font-weight: 400; color: var(--text-3); }
+.rot-btns { display: flex; gap: 6px; }
+.rot-btns .btn { flex: 1; padding: 0 8px; font-size: 13px; }
+#fbRotate.active { background: var(--accent-soft); color: var(--accent-text); }
 .annot-layer { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
 .target-layer { position: absolute; inset: 0; }
 body:not(.content-edit) .target-layer { display: none; }
@@ -734,6 +745,34 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
             <button class="icon-btn" id="fbZoomIn" title="ขยาย (Ctrl +)" data-icon="plus"></button>
             <button class="icon-btn fit-btn" id="fbFitW" title="พอดีความกว้าง" data-icon="fitWidth"></button>
             <button class="icon-btn fit-btn" id="fbFitP" title="พอดีทั้งหน้า (Ctrl 0)" data-icon="fitPage"></button>
+            <span class="vsep"></span>
+            <button class="icon-btn" id="fbRotate" title="หมุนเอกสาร" data-icon="rotateCw"></button>
+          </div>
+          <div class="rot-pop" id="rotPop" hidden>
+            <h4>หมุนเอกสาร <button class="icon-btn" id="rotClose" data-icon="x" title="ปิด" style="width:28px;height:28px"></button></h4>
+            <div class="seg" id="rotScope">
+              <button data-scope="all" class="active">ทั้งฉบับ</button>
+              <button data-scope="cur">หน้านี้</button>
+              <button data-scope="range">ระบุหน้า</button>
+            </div>
+            <input type="text" class="input" id="rotRange" placeholder="เช่น 1-3, 5, 8" hidden>
+            <div class="rot-sec">
+              <div class="rot-sec-title">มุมมองชั่วคราว <small>— ไม่บันทึกลงไฟล์</small></div>
+              <div class="rot-btns">
+                <button class="btn sm" data-rot="view" data-deg="-90" data-icon="rotateCcw">ซ้าย</button>
+                <button class="btn sm" data-rot="view" data-deg="90" data-icon="rotateCw">ขวา</button>
+                <button class="btn sm" data-rot="view" data-deg="reset">คืนค่า</button>
+              </div>
+            </div>
+            <div class="rot-sec">
+              <div class="rot-sec-title">หมุนถาวร <small>— บันทึกลงไฟล์ (เลิกทำได้)</small></div>
+              <div class="rot-btns">
+                <button class="btn sm" data-rot="perm" data-deg="-90" data-icon="rotateCcw">ซ้าย</button>
+                <button class="btn sm" data-rot="perm" data-deg="90" data-icon="rotateCw">ขวา</button>
+                <button class="btn sm" data-rot="perm" data-deg="180">180°</button>
+              </div>
+            </div>
+            <p class="muted small" style="margin:10px 0 0">คีย์ลัดมุมมอง: Ctrl+Shift+ปุ่ม + / − (ทั้งฉบับ)</p>
           </div>
         </div>
       </section>
@@ -1040,6 +1079,7 @@ const S = {
   zoom: PT2PX, fitMode: 'auto', curPage: 0,
   history: [], future: [], dirty: false,
   selected: null, pending: null,
+  viewRot: [],        // การหมุนมุมมองชั่วคราวต่อหน้า (องศา) — ไม่บันทึกลงไฟล์
   textStyle: Object.assign({ font: 'Sarabun', size: 16, color: '#0000cd', bold: false }, storage.get('cem_textstyle', {})),
 };
 let pendingToolAfterOpen = null;
@@ -1081,6 +1121,7 @@ async function setDocument(bytes, name, { reset = false, annots = null } = {}) {
   S.doc = { bytes, name: name || old?.name || 'document.pdf', proxy, pages, annots: annots && annots.length === pages.length ? annots : pages.map(() => []) };
   if (old?.proxy && old.proxy !== proxy) { const op = old.proxy; setTimeout(() => op.destroy(), 1500); }
   if (reset) { S.history = []; S.future = []; S.dirty = false; }
+  if (reset || S.viewRot.length !== pages.length) S.viewRot = pages.map(() => 0);
   thumbCache.clear(); S.selected = null; SP.selected.clear(); SP.anchor = null; CE.targets.clear(); CE.raster = null;
   S.curPage = Math.min(S.curPage, pages.length - 1);
   if (reset) { S.curPage = 0; S.fitMode = 'auto'; }
@@ -1154,7 +1195,7 @@ async function switchTool(t) {
     if (r === 'apply') { const ok = await applyOrganize(true); if (!ok) return; } else O.changed = false;
   }
   if (DOC_TOOLS.includes(t) && !S.doc) { pickPdf(t); return; }
-  stopPlacing(); if (t !== 'edit') setContentEdit(false); hideCtx();
+  stopPlacing(); if (t !== 'edit') setContentEdit(false); hideCtx(); $('#rotPop').hidden = true;
   S.tool = t;
   document.body.className = document.body.className.replace(/\btool-\S+/g, '').trim() + ' tool-' + t;
   const hasPanel = !['home', 'view'].includes(t);
@@ -1201,9 +1242,9 @@ function buildViewer() {
   S.doc.pages.forEach((p, i) => {
     const wrap = el('div', 'page'); wrap.dataset.index = i;
     const canvas = document.createElement('canvas');
-    const layer = el('div', 'annot-layer'); const tlayer = el('div', 'target-layer');
-    wrap.append(canvas, tlayer, layer); pagesEl.append(wrap);
-    pageEls.push({ wrap, canvas, tlayer, layer, zoom: 0, task: null });
+    const layer = el('div', 'annot-layer'); const tlayer = el('div', 'target-layer'); const inner = el('div', 'page-inner');
+    inner.append(canvas, tlayer, layer); wrap.append(inner); pagesEl.append(wrap);
+    pageEls.push({ wrap, inner, canvas, tlayer, layer, zoom: 0, task: null });
     pageIO.observe(wrap);
   });
   layoutPages();
@@ -1213,7 +1254,13 @@ function buildViewer() {
 
 function layoutPages() {
   if (!S.doc) return;
-  pageEls.forEach((pe, i) => { const p = S.doc.pages[i]; pe.wrap.style.width = p.w * S.zoom + 'px'; pe.wrap.style.height = p.h * S.zoom + 'px'; });
+  pageEls.forEach((pe, i) => {
+    const p = S.doc.pages[i], v = visDims(i), z = S.zoom;
+    pe.wrap.style.width = v.w * z + 'px'; pe.wrap.style.height = v.h * z + 'px';
+    pe.inner.style.width = p.w * z + 'px'; pe.inner.style.height = p.h * z + 'px';
+    pe.inner.style.transform = `translate(-50%, -50%) rotate(${S.viewRot[i] || 0}deg)`;
+  });
+  $('#fbRotate').classList.toggle('active', S.viewRot.some(r => r));
   renderAllAnnots();
   visible.forEach(renderPage);
   $('#zoomLabel').textContent = Math.round(S.zoom / PT2PX * 100) + '%';
@@ -1242,7 +1289,7 @@ async function renderPage(i) {
 }
 
 function fitZoom(mode) {
-  const ps = S.doc.pages; const availW = viewer.clientWidth - (isMobile() ? 24 : 48);
+  const ps = S.doc.pages.map((_, i) => visDims(i)); const availW = viewer.clientWidth - (isMobile() ? 24 : 48);
   const maxW = Math.max(...ps.map(p => p.w));
   const fw = availW / maxW;
   if (mode === 'width') return fw;
@@ -1294,6 +1341,59 @@ $('#fbFitP').onclick = () => { S.fitMode = 'page'; applyFit(); goToPage(S.curPag
 $('#fbThumbs').onclick = () => { const c = $('#thumbs').classList.toggle('collapsed'); $('#fbThumbs').classList.toggle('active', !c); storage.set('cem_thumbs', !c); requestAnimationFrame(applyFit); };
 if (storage.get('cem_thumbs', true) === false) { $('#thumbs').classList.add('collapsed'); $('#fbThumbs').classList.remove('active'); }
 $('#pageInput').addEventListener('keydown', e => { if (e.key === 'Enter') { const n = parseInt(e.target.value, 10); if (n) goToPage(n - 1); e.target.blur(); } });
+
+/* ---------- การหมุนเอกสาร ---------- */
+// ขนาดหน้าที่เห็นหลังหมุนมุมมองชั่วคราว
+function visDims(i) { const p = S.doc.pages[i]; return (S.viewRot[i] || 0) % 180 ? { w: p.h, h: p.w } : { w: p.w, h: p.h }; }
+// แปลงเวกเตอร์บนหน้าจอ → แกนของหน้า (หักล้างการหมุนมุมมอง)
+function unrot(i, dx, dy) { const a = -(S.viewRot[i] || 0) * Math.PI / 180; const c = Math.round(Math.cos(a)), s = Math.round(Math.sin(a)); return [dx * c - dy * s, dx * s + dy * c]; }
+function screenToPage(i, cx, cy) {
+  const z = S.zoom, p = S.doc.pages[i], r = pageEls[i].wrap.getBoundingClientRect();
+  const [ux, uy] = unrot(i, cx - (r.left + r.width / 2), cy - (r.top + r.height / 2));
+  return { x: (ux + p.w * z / 2) / z, y: (uy + p.h * z / 2) / z };
+}
+let rotScope = 'all';
+function rotTargets() {
+  const n = S.doc.pages.length;
+  if (rotScope === 'cur') return [S.curPage];
+  if (rotScope === 'range') return [...new Set(parseRanges($('#rotRange').value, n).flatMap(g => g.pages))].sort((a, b) => a - b);
+  return [...Array(n).keys()];
+}
+function rotateView(pages, deg) {
+  const keep = S.curPage;
+  pages.forEach(i => { S.viewRot[i] = deg === 'reset' ? 0 : (((S.viewRot[i] || 0) + deg) % 360 + 360) % 360; });
+  if (S.fitMode) applyFit(); else layoutPages();
+  goToPage(keep, false);
+}
+async function rotatePermanent(pages, deg) {
+  if (!pages.length) return;
+  await busy('กำลังหมุนหน้า...');
+  try {
+    const d = await PDFDocument.load(S.doc.bytes, { ignoreEncryption: true }); const set = new Set(pages);
+    // องค์ประกอบที่วางไว้บนหน้าที่จะหมุน ต้องฝังลงหน้าก่อน เพื่อให้หมุนไปพร้อมกัน
+    const burn = S.doc.annots.map((l, i) => set.has(i) ? l : []);
+    if (burn.some(l => l.length)) await burnAnnotsInto(d, burn);
+    const pg = d.getPages(); pages.forEach(i => { const p = pg[i]; p.setRotation(degrees((((p.getRotation().angle || 0) + deg) % 360 + 360) % 360)); });
+    const out = await d.save(); const annots = S.doc.annots.map((l, i) => set.has(i) ? [] : l); const keep = S.curPage;
+    pushHistory(); await setDocument(out, S.doc.name, { annots });
+    goToPage(keep, false);
+    toast(`หมุน ${pages.length === S.doc.pages.length ? 'ทั้งฉบับ' : pages.length + ' หน้า'} ${deg === 180 ? '180°' : deg > 0 ? 'ไปทางขวา' : 'ไปทางซ้าย'} แล้ว`, 'success');
+  } catch (e) { toast('หมุนไม่สำเร็จ: ' + e.message, 'error'); }
+  finally { unbusy(); }
+}
+$('#fbRotate').onclick = () => { const p = $('#rotPop'); p.hidden = !p.hidden; };
+$('#rotClose').onclick = () => { $('#rotPop').hidden = true; };
+$$('#rotScope button').forEach(b => b.onclick = () => {
+  rotScope = b.dataset.scope; $$('#rotScope button').forEach(x => x.classList.toggle('active', x === b));
+  $('#rotRange').hidden = rotScope !== 'range'; if (rotScope === 'range') $('#rotRange').focus();
+});
+$$('#rotPop [data-rot]').forEach(b => b.onclick = () => {
+  if (!S.doc) return; const pages = rotTargets();
+  if (!pages.length) return toast('กรุณาระบุหน้าที่ต้องการหมุน เช่น 1-3, 5', 'error');
+  const deg = b.dataset.deg === 'reset' ? 'reset' : +b.dataset.deg;
+  if (b.dataset.rot === 'view') rotateView(pages, deg); else rotatePermanent(pages, deg);
+});
+$('#rotRange').addEventListener('keydown', e => e.stopPropagation());
 
 function buildThumbs() {
   const box = $('#thumbs'); clearLazy(box); box.innerHTML = '';
@@ -1395,8 +1495,8 @@ $('#editImagePicker').onchange = async e => {
 };
 
 function placeAt(i, e) {
-  const p = S.pending; const r = pageEls[i].wrap.getBoundingClientRect(); const z = S.zoom; const pg = S.doc.pages[i];
-  const px = (e.clientX - r.left) / z, py = (e.clientY - r.top) / z; let a;
+  const p = S.pending; const pg = S.doc.pages[i];
+  const { x: px, y: py } = screenToPage(i, e.clientX, e.clientY); let a;
   if (p.type === 'text') {
     const st = S.textStyle; const size = p.kind === 'check' || p.kind === 'cross' ? Math.max(st.size, 18) : st.size;
     a = { id: uid(), type: 'text', text: p.text, font: st.font, size, color: st.color, bold: st.bold, x: px, y: py - size * LH / 2 };
@@ -1445,7 +1545,7 @@ function startDrag(e, a, page, annEl, mode) {
   const bw0 = annEl.offsetWidth / z;
   const before = snapshot(); let moved = false;
   const move = ev => {
-    const dx = (ev.clientX - sx) / z, dy = (ev.clientY - sy) / z;
+    let [dx, dy] = unrot(page, ev.clientX - sx, ev.clientY - sy); dx /= z; dy /= z;
     if (!moved && Math.hypot(dx, dy) * z < 3) return; moved = true;
     if (mode === 'move') {
       const bw = annEl.offsetWidth / z, bh = annEl.offsetHeight / z;
@@ -1722,10 +1822,10 @@ async function onTarget(i, key) {
   else { const b = t.images.find(x => x.key === key); if (b) await captureRegion(i, b, { key }); }
 }
 function startBand(e, i) {
-  const pe = pageEls[i], z = S.zoom, r = pe.wrap.getBoundingClientRect();
-  const x0 = (e.clientX - r.left) / z, y0 = (e.clientY - r.top) / z; const band = el('div', 'band'); pe.tlayer.append(band); let b = null;
+  const pe = pageEls[i], z = S.zoom;
+  const { x: x0, y: y0 } = screenToPage(i, e.clientX, e.clientY); const band = el('div', 'band'); pe.tlayer.append(band); let b = null;
   const move = ev => {
-    const x = (ev.clientX - r.left) / z, y = (ev.clientY - r.top) / z;
+    const { x, y } = screenToPage(i, ev.clientX, ev.clientY);
     b = { x: Math.min(x0, x), y: Math.min(y0, y), w: Math.abs(x - x0), h: Math.abs(y - y0) };
     Object.assign(band.style, { left: b.x * z + 'px', top: b.y * z + 'px', width: b.w * z + 'px', height: b.h * z + 'px' });
   };
@@ -2356,6 +2456,8 @@ document.addEventListener('keydown', e => {
   if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
   if (mod && k === 'y') { e.preventDefault(); redo(); return; }
   if (VIEW_OF[S.tool] === 'docView') {
+    if (mod && e.shiftKey && (e.code === 'Equal' || e.code === 'NumpadAdd')) { e.preventDefault(); rotateView(S.doc.pages.map((_, i) => i), 90); return; }
+    if (mod && e.shiftKey && (e.code === 'Minus' || e.code === 'NumpadSubtract')) { e.preventDefault(); rotateView(S.doc.pages.map((_, i) => i), -90); return; }
     if (mod && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomStep(1); return; }
     if (mod && e.key === '-') { e.preventDefault(); zoomStep(-1); return; }
     if (mod && e.key === '0') { e.preventDefault(); S.fitMode = 'page'; applyFit(); return; }
