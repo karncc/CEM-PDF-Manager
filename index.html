@@ -214,7 +214,26 @@ body.has-panel .panel { display: block; }
 #pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 24px 110px; width: max-content; min-width: 100%; position: relative; }
 .page { position: relative; background: #fff; box-shadow: var(--page-shadow); flex: none; }
 .page canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.annot-layer { position: absolute; inset: 0; overflow: visible; }
+.annot-layer { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.target-layer { position: absolute; inset: 0; }
+body:not(.content-edit) .target-layer { display: none; }
+body.content-edit .page { cursor: crosshair; touch-action: none; }
+.tgt { position: absolute; cursor: pointer; border-radius: 2px; outline: 1px dashed rgba(20,115,230,.45); }
+.tgt:hover { background: rgba(20,115,230,.13); outline: 1.5px solid var(--accent); }
+.tgt-img { outline-color: rgba(230,134,25,.75); }
+.tgt-img:hover { background: rgba(230,134,25,.13); outline: 1.5px solid #e68619; }
+.band { position: absolute; border: 1.5px dashed var(--accent); background: rgba(20,115,230,.1); pointer-events: none; }
+.annot.annot-cover { pointer-events: none !important; outline: none !important; }
+.ce-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.arrange-row { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; }
+.arrange-row .icon-btn { border: 1px solid var(--border); width: 36px; height: 34px; }
+.ctx { position: fixed; z-index: 2600; min-width: 230px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--pop-shadow); padding: 5px; }
+.ctx button { display: flex; width: 100%; align-items: center; gap: 10px; border: 0; background: none; color: var(--text); padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 13.5px; text-align: left; }
+.ctx button:hover { background: var(--hover); }
+.ctx button svg { width: 17px; height: 17px; color: var(--text-2); }
+.ctx button kbd { margin-left: auto; font-family: inherit; font-size: 11.5px; color: var(--text-3); }
+.ctx button.danger, .ctx button.danger svg { color: var(--danger); }
+.ctx hr { border: 0; border-top: 1px solid var(--border); margin: 4px 2px; }
 body.placing .page { cursor: crosshair; }
 
 .annot { position: absolute; pointer-events: none; }
@@ -422,8 +441,12 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
       <div class="panel-sec" data-panel="edit">
         <div class="panel-head">
           <h2>แก้ไข &amp; ลงนาม</h2>
-          <p>เลือกเครื่องมือ แล้วคลิกบนหน้าเอกสารเพื่อวาง ลากเพื่อย้าย ลากมุมขวาล่างเพื่อปรับขนาด</p>
+          <p>แก้ไขเนื้อหาเดิม หรือเพิ่มข้อความ ลายเซ็น รูปภาพ ลงบนเอกสาร</p>
         </div>
+        <button class="btn btn-block ce-btn" id="btnContentEdit" data-icon="textCursor">แก้ไขข้อความ &amp; วัตถุเดิม</button>
+        <p class="muted small" style="margin:8px 0 0;line-height:1.55">คลิกข้อความหรือรูปภาพที่มีอยู่ในเอกสารเพื่อแก้ไข ย้าย หรือลบ — หรือลากคลุมพื้นที่ใดก็ได้เพื่อย้าย/ลบส่วนนั้น</p>
+
+        <div class="sec-title">เพิ่มเนื้อหาใหม่</div>
         <div class="tile-grid">
           <button class="tile" data-place="text" data-icon="type"><span>ข้อความ</span></button>
           <button class="tile" data-place="signature" data-icon="signature"><span>ลายเซ็น</span></button>
@@ -459,10 +482,18 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
           </div>
         </div>
 
-        <div class="row" style="margin-top:4px">
-          <button class="btn sm" id="btnCopyAll" data-icon="copy" disabled><span>คัดลอกไปทุกหน้า</span></button>
-          <button class="btn sm" id="btnDelSel" data-icon="trash" disabled><span>ลบ</span></button>
+        <div class="sec-title">จัดเรียง &amp; ลำดับชั้น</div>
+        <div class="arrange-row">
+          <button class="icon-btn" data-cmd="front" title="นำไปไว้หน้าสุด" data-icon="toFront" disabled></button>
+          <button class="icon-btn" data-cmd="forward" title="นำไปข้างหน้า" data-icon="forward" disabled></button>
+          <button class="icon-btn" data-cmd="backward" title="ส่งไปข้างหลัง" data-icon="backward" disabled></button>
+          <button class="icon-btn" data-cmd="back" title="ส่งไปหลังสุด" data-icon="toBack" disabled></button>
+          <span class="vsep"></span>
+          <button class="icon-btn" data-cmd="dup" title="ทำสำเนา" data-icon="copy" disabled></button>
+          <button class="icon-btn" data-cmd="copyall" title="คัดลอกไปทุกหน้า" data-icon="layers" disabled></button>
+          <button class="icon-btn" data-cmd="del" title="ลบ" data-icon="trash" disabled></button>
         </div>
+        <p class="muted small" style="margin:6px 0 0">หรือคลิกขวาที่วัตถุเพื่อเปิดเมนู</p>
 
         <div class="sec-title">ลายเซ็นที่บันทึกไว้</div>
         <div class="sig-list" id="savedSigs"></div>
@@ -470,6 +501,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
         <div class="note">
           <b>เคล็ดลับ</b><br>
           • ดับเบิลคลิกที่ข้อความเพื่อแก้ไข<br>
+          • วัตถุซ้อนกัน: คลิกขวา หรือ <b>Ctrl+]</b> / <b>Ctrl+[</b> เพื่อเลื่อนลำดับชั้น<br>
           • กด <b>Delete</b> เพื่อลบ, ปุ่มลูกศรเพื่อเลื่อนทีละนิด<br>
           • ฟอนต์ระบบ (เช่น TH SarabunPSK) ต้องติดตั้งในเครื่องก่อน<br>
           • ข้อความจะถูกฝังลงไฟล์เมื่อกด "ดาวน์โหลด"
@@ -688,6 +720,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
         <div class="thumbs" id="thumbs"></div>
         <div class="viewer-wrap">
           <div class="viewer" id="viewer"><div id="pages"></div></div>
+          <div class="place-banner" id="ceBanner" hidden><span>แก้ไขเนื้อหาเดิม — คลิกข้อความ/รูป หรือลากคลุมพื้นที่</span><button id="ceExit">เสร็จสิ้น</button></div>
           <div class="place-banner" id="placeHint" hidden><span id="placeHintText">คลิกบนหน้าเอกสารเพื่อวาง</span><button id="placeCancel">ยกเลิก (Esc)</button></div>
           <div class="floatbar" id="floatbar">
             <button class="icon-btn active" id="fbThumbs" title="แสดง/ซ่อนภาพย่อ" data-icon="sidebar"></button>
@@ -823,6 +856,19 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
   </div>
 </div>
 
+<div class="ctx" id="ctxMenu" hidden>
+  <button data-cmd="front" data-icon="toFront">นำไปไว้หน้าสุด<kbd>Ctrl+Shift+]</kbd></button>
+  <button data-cmd="forward" data-icon="forward">นำไปข้างหน้า<kbd>Ctrl+]</kbd></button>
+  <button data-cmd="backward" data-icon="backward">ส่งไปข้างหลัง<kbd>Ctrl+[</kbd></button>
+  <button data-cmd="back" data-icon="toBack">ส่งไปหลังสุด<kbd>Ctrl+Shift+[</kbd></button>
+  <hr>
+  <button data-cmd="edit" data-icon="type">แก้ไขข้อความ<kbd>ดับเบิลคลิก</kbd></button>
+  <button data-cmd="dup" data-icon="copy">ทำสำเนา<kbd>Ctrl+D</kbd></button>
+  <button data-cmd="copyall" data-icon="layers">คัดลอกไปทุกหน้า</button>
+  <hr>
+  <button data-cmd="del" data-icon="trash" class="danger">ลบ<kbd>Delete</kbd></button>
+</div>
+
 <div id="busy"><div class="busy-box"><div class="spinner"></div><span id="busyText">กำลังประมวลผล...</span></div></div>
 <div id="toasts"></div>
 <div id="dropOverlay"><div>วางไฟล์ที่นี่</div></div>
@@ -877,6 +923,11 @@ const ICONS = {
   checkSquare: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 12 2 2 4-4"/>',
   copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  textCursor: '<path d="M17 22h-1a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h1"/><path d="M7 22h1a4 4 0 0 0 4-4v-1"/><path d="M7 2h1a4 4 0 0 1 4 4v1"/>',
+  toFront: '<rect x="3" y="3" width="11" height="11" rx="1.5" stroke-dasharray="2.5 2.5"/><rect x="10" y="10" width="11" height="11" rx="1.5" fill="currentColor" fill-opacity=".35"/>',
+  toBack: '<rect x="10" y="10" width="11" height="11" rx="1.5" stroke-dasharray="2.5 2.5"/><rect x="3" y="3" width="11" height="11" rx="1.5" fill="currentColor" fill-opacity=".35"/>',
+  forward: '<path d="M12 14V3M8 7l4-4 4 4"/><rect x="4" y="16" width="16" height="5" rx="1.5" fill="currentColor" fill-opacity=".25"/>',
+  backward: '<path d="M12 3v11M8 10l4 4 4-4"/><rect x="4" y="16" width="16" height="5" rx="1.5" fill="currentColor" fill-opacity=".25"/>',
   alert: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
 };
 function icon(name) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`; }
@@ -1030,7 +1081,7 @@ async function setDocument(bytes, name, { reset = false, annots = null } = {}) {
   S.doc = { bytes, name: name || old?.name || 'document.pdf', proxy, pages, annots: annots && annots.length === pages.length ? annots : pages.map(() => []) };
   if (old?.proxy && old.proxy !== proxy) { const op = old.proxy; setTimeout(() => op.destroy(), 1500); }
   if (reset) { S.history = []; S.future = []; S.dirty = false; }
-  thumbCache.clear(); S.selected = null; SP.selected.clear(); SP.anchor = null;
+  thumbCache.clear(); S.selected = null; SP.selected.clear(); SP.anchor = null; CE.targets.clear(); CE.raster = null;
   S.curPage = Math.min(S.curPage, pages.length - 1);
   if (reset) { S.curPage = 0; S.fitMode = 'auto'; }
   buildViewer();
@@ -1103,7 +1154,7 @@ async function switchTool(t) {
     if (r === 'apply') { const ok = await applyOrganize(true); if (!ok) return; } else O.changed = false;
   }
   if (DOC_TOOLS.includes(t) && !S.doc) { pickPdf(t); return; }
-  stopPlacing();
+  stopPlacing(); if (t !== 'edit') setContentEdit(false); hideCtx();
   S.tool = t;
   document.body.className = document.body.className.replace(/\btool-\S+/g, '').trim() + ' tool-' + t;
   const hasPanel = !['home', 'view'].includes(t);
@@ -1150,9 +1201,9 @@ function buildViewer() {
   S.doc.pages.forEach((p, i) => {
     const wrap = el('div', 'page'); wrap.dataset.index = i;
     const canvas = document.createElement('canvas');
-    const layer = el('div', 'annot-layer');
-    wrap.append(canvas, layer); pagesEl.append(wrap);
-    pageEls.push({ wrap, canvas, layer, zoom: 0, task: null });
+    const layer = el('div', 'annot-layer'); const tlayer = el('div', 'target-layer');
+    wrap.append(canvas, tlayer, layer); pagesEl.append(wrap);
+    pageEls.push({ wrap, canvas, tlayer, layer, zoom: 0, task: null });
     pageIO.observe(wrap);
   });
   layoutPages();
@@ -1186,6 +1237,7 @@ async function renderPage(i) {
     await task.promise;
     if (pe.zoom !== z || doc !== S.doc) return;
     pe.canvas.replaceWith(c); pe.canvas = c; pe.task = null;
+    if (CE.on) renderTargets(i);
   } catch (e) { if (pe.zoom === z) pe.zoom = 0; }
 }
 
@@ -1268,6 +1320,7 @@ function findAnnot(id) {
 function makeAnnotEl(a, preview) {
   const z = S.zoom; const d = el('div', 'annot annot-' + a.type + (preview ? ' preview' : ''));
   d.dataset.id = a.id; d.style.left = a.x * z + 'px'; d.style.top = a.y * z + 'px';
+  if (a.cover) { d.classList.add('annot-cover'); preview = true; }
   if (a.type === 'text') {
     const t = el('div', 'annot-text'); t.textContent = a.text;
     t.style.font = fontCss(a.font, a.size * z, a.bold); t.style.lineHeight = LH; t.style.color = a.color;
@@ -1283,9 +1336,12 @@ function makeAnnotEl(a, preview) {
 }
 function renderAnnots(i) {
   const pe = pageEls[i]; if (!pe) return; pe.layer.innerHTML = '';
-  for (const a of S.doc.annots[i]) pe.layer.append(makeAnnotEl(a));
+  for (const a of ordered(S.doc.annots[i])) pe.layer.append(makeAnnotEl(a));
   for (const a of previewAnnots(i)) pe.layer.append(makeAnnotEl(a, true));
+  if (CE.on && visible.has(i)) renderTargets(i);
 }
+// กล่องปิดทับเนื้อหาเดิมอยู่ล่างสุดเสมอ ที่เหลือเรียงตามลำดับชั้น (ท้ายสุด = หน้าสุด)
+const ordered = list => [...list.filter(a => a.cover), ...list.filter(a => !a.cover)];
 function renderAllAnnots() { if (!S.doc) return; pageEls.forEach((_, i) => renderAnnots(i)); }
 function rerenderAnnot(a, page) {
   const layer = pageEls[page]?.layer; if (!layer) return;
@@ -1310,12 +1366,13 @@ function startPlacing(p) {
   S.pending = p; document.body.classList.add('placing');
   $$('.tile[data-place]').forEach(t => t.classList.toggle('active', t.dataset.place === p.kind));
   $('#placeHintText').textContent = `คลิกบนหน้าเอกสารเพื่อวาง${PLACE_LABEL[p.kind] || ''}`;
-  $('#placeHint').hidden = false; select(null);
+  $('#placeHint').hidden = false; $('#ceBanner').hidden = true; select(null);
   if (isMobile()) document.body.classList.remove('panel-open');
 }
 function stopPlacing() {
   S.pending = null; document.body.classList.remove('placing');
   $$('.tile[data-place]').forEach(t => t.classList.remove('active')); $('#placeHint').hidden = true;
+  if (typeof CE !== 'undefined') $('#ceBanner').hidden = !CE.on;
 }
 $('#placeCancel').onclick = stopPlacing;
 
@@ -1362,6 +1419,12 @@ pagesEl.addEventListener('pointerdown', e => {
   const i = +wrap.dataset.index;
   if (S.pending) { e.preventDefault(); placeAt(i, e); return; }
   const annEl = e.target.closest('.annot:not(.preview)');
+  if (CE.on && !annEl) {
+    e.preventDefault(); if (document.activeElement?.isContentEditable) document.activeElement.blur();
+    select(null); const tgt = e.target.closest('.tgt');
+    if (tgt) onTarget(i, tgt.dataset.key).catch(err => toast('แก้ไขไม่สำเร็จ: ' + err.message, 'error')); else startBand(e, i);
+    return;
+  }
   if (!annEl) { if (!document.activeElement?.isContentEditable) select(null); return; }
   if (annEl.classList.contains('editing')) return;
   const f = findAnnot(+annEl.dataset.id); if (!f) return;
@@ -1435,7 +1498,7 @@ function syncProps() {
     $('#objFillRow').hidden = a.type !== 'rect'; if (a.type === 'rect') $('#objFill').value = a.fill;
     $('#objOpacity').value = Math.round((a.opacity ?? 1) * 100); $('#objOpacityVal').textContent = $('#objOpacity').value + '%';
   }
-  $('#btnDelSel').disabled = !a; $('#btnCopyAll').disabled = !a || S.doc.pages.length < 2;
+  $$('.arrange-row [data-cmd]').forEach(b => b.disabled = !a || (b.dataset.cmd === 'copyall' && S.doc.pages.length < 2));
 }
 function commitProp() { if (propSnap) { pushHistory(propSnap); propSnap = null; } }
 function onTextFmt(live) {
@@ -1457,18 +1520,221 @@ function onObjProp(live) {
   rerenderAnnot(f.a, f.page); if (!live) commitProp();
 }
 ['objFill', 'objOpacity'].forEach(id => { $('#' + id).addEventListener('input', () => onObjProp(true)); $('#' + id).addEventListener('change', commitProp); });
-$('#btnDelSel').onclick = () => S.selected != null && deleteAnnot(S.selected);
-$('#btnCopyAll').onclick = () => {
+function copyAll() {
   const f = findAnnot(S.selected); if (!f) return;
   pushHistory(); let n = 0;
   S.doc.pages.forEach((pg, i) => {
     if (i === f.page) return;
-    const c = { ...f.a, id: uid() };
+    const c = { ...f.a, id: uid() }; delete c.srcKey;
     c.x = clamp(c.x, 0, Math.max(0, pg.w - (c.w || 20))); c.y = clamp(c.y, 0, Math.max(0, pg.h - (c.h || 20)));
     S.doc.annots[i].push(c); n++;
   });
   renderAllAnnots(); toast(`คัดลอกไปยังอีก ${n} หน้าแล้ว`, 'success');
-};
+}
+
+/* ---------- ลำดับชั้น (z-order) & เมนูคลิกขวา ---------- */
+function arrange(op) {
+  const f = findAnnot(S.selected); if (!f || f.a.cover) return;
+  const L = S.doc.annots[f.page]; const covers = L.filter(a => a.cover), objs = L.filter(a => !a.cover);
+  const k = objs.indexOf(f.a); const last = objs.length - 1;
+  const n = op === 'front' ? last : op === 'back' ? 0 : op === 'forward' ? Math.min(last, k + 1) : Math.max(0, k - 1);
+  if (n === k) return toast(n === last ? 'วัตถุนี้อยู่หน้าสุดแล้ว' : 'วัตถุนี้อยู่หลังสุดแล้ว');
+  pushHistory(); objs.splice(k, 1); objs.splice(n, 0, f.a);
+  S.doc.annots[f.page] = [...covers, ...objs]; renderAnnots(f.page);
+}
+function duplicateSel() {
+  const f = findAnnot(S.selected); if (!f) return;
+  pushHistory(); const c = { ...f.a, id: uid(), x: f.a.x + 12, y: f.a.y + 12 }; delete c.srcKey;
+  S.doc.annots[f.page].push(c); renderAnnots(f.page); select(c.id);
+}
+function runCmd(c) {
+  if (S.selected == null) return;
+  if (['front', 'forward', 'backward', 'back'].includes(c)) arrange(c);
+  else if (c === 'dup') duplicateSel();
+  else if (c === 'copyall') copyAll();
+  else if (c === 'del') deleteAnnot(S.selected);
+  else if (c === 'edit') { const f = findAnnot(S.selected); if (f && f.a.type === 'text') startEditText(f.a, false); }
+}
+$$('.arrange-row [data-cmd]').forEach(b => b.onclick = () => runCmd(b.dataset.cmd));
+const MOD_KEY = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+$$('#ctxMenu kbd').forEach(k => k.textContent = k.textContent.replace('Ctrl', MOD_KEY));
+const hideCtx = () => { $('#ctxMenu').hidden = true; };
+$('#ctxMenu').addEventListener('click', e => { const b = e.target.closest('[data-cmd]'); if (!b) return; hideCtx(); runCmd(b.dataset.cmd); });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#ctxMenu')) hideCtx(); }, true);
+viewer.addEventListener('scroll', hideCtx, { passive: true });
+pagesEl.addEventListener('contextmenu', e => {
+  if (S.tool !== 'edit') return;
+  const annEl = e.target.closest('.annot:not(.preview):not(.annot-cover)'); if (!annEl) return;
+  e.preventDefault(); select(+annEl.dataset.id);
+  const f = findAnnot(S.selected); if (!f) return;
+  const m = $('#ctxMenu'); m.querySelector('[data-cmd="edit"]').hidden = f.a.type !== 'text';
+  m.querySelector('[data-cmd="copyall"]').hidden = S.doc.pages.length < 2;
+  m.hidden = false; const r = m.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(e.clientX, innerWidth - r.width - 8)) + 'px';
+  m.style.top = Math.max(8, Math.min(e.clientY, innerHeight - r.height - 8)) + 'px';
+});
+
+/* =============================================================
+   แก้ไขเนื้อหาเดิมในเอกสาร
+   หลักการ: ตรวจหาข้อความ/รูปภาพเดิมจาก pdf.js → เมื่อคลิก จะปิดทับของเดิมด้วย
+   สีพื้นหลัง แล้วสร้างวัตถุใหม่ที่แก้ไข/ย้าย/ลบได้ ณ ตำแหน่งเดิม
+   ============================================================= */
+const CE = { on: false, targets: new Map(), raster: null };
+function setContentEdit(on) {
+  CE.on = !!on && S.tool === 'edit' && !!S.doc;
+  document.body.classList.toggle('content-edit', CE.on);
+  $('#btnContentEdit').classList.toggle('on', CE.on);
+  $('#ceBanner').hidden = !CE.on || !!S.pending;
+  if (CE.on) { stopPlacing(); visible.forEach(i => renderTargets(i)); if (isMobile()) document.body.classList.remove('panel-open'); }
+  else pageEls.forEach(pe => { pe.tlayer.innerHTML = ''; });
+}
+$('#btnContentEdit').onclick = () => setContentEdit(!CE.on);
+$('#ceExit').onclick = () => setContentEdit(false);
+
+function getTargets(i) { if (!CE.targets.has(i)) CE.targets.set(i, computeTargets(S.doc, i)); return CE.targets.get(i); }
+function mapPdfFont(name) {
+  const n = (name || '').replace(/^[A-Z]{6}\+/, ''); const bold = /bold|black|heavy|semibold|demi/i.test(n);
+  const rules = [[/sarabunpsk|th\s*sarabun/i, 'TH SarabunPSK'], [/sarabun/i, 'Sarabun'], [/angsana/i, 'Angsana New'], [/cordia/i, 'Cordia New'], [/browallia/i, 'Browallia New'], [/tahoma/i, 'Tahoma'], [/prompt/i, 'Prompt'], [/charm/i, 'Charm'], [/noto\s*sans\s*thai|notosansthai/i, 'Noto Sans Thai'], [/arial|helvetica/i, 'Arial']];
+  const r = rules.find(([re]) => re.test(n)); return { font: r ? r[1] : null, bold };
+}
+async function computeTargets(doc, i) {
+  const page = await doc.proxy.getPage(i + 1); const vp = page.getViewport({ scale: 1 }); const U = pdfjsLib.Util;
+  const images = [], texts = [];
+  try {
+    const ops = await page.getOperatorList(); const OPS = pdfjsLib.OPS; let ctm = [1, 0, 0, 1, 0, 0]; const st = [];
+    const imgOps = new Set([OPS.paintImageXObject, OPS.paintInlineImageXObject, OPS.paintImageMaskXObject, OPS.paintJpegXObject].filter(x => x != null));
+    for (let k = 0; k < ops.fnArray.length; k++) {
+      const fn = ops.fnArray[k], args = ops.argsArray[k];
+      if (fn === OPS.save) st.push(ctm);
+      else if (fn === OPS.restore) ctm = st.pop() || ctm;
+      else if (fn === OPS.transform) ctm = U.transform(ctm, args);
+      else if (fn === OPS.paintFormXObjectBegin) { st.push(ctm); if (args && Array.isArray(args[0]) && args[0].length === 6) ctm = U.transform(ctm, args[0]); }
+      else if (fn === OPS.paintFormXObjectEnd) ctm = st.pop() || ctm;
+      else if (imgOps.has(fn)) {
+        const m = U.transform(vp.transform, ctm); const pts = [[0, 0], [1, 0], [0, 1], [1, 1]].map(p => U.applyTransform(p, m));
+        const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+        const x0 = clamp(Math.min(...xs), 0, vp.width), y0 = clamp(Math.min(...ys), 0, vp.height), x1 = clamp(Math.max(...xs), 0, vp.width), y1 = clamp(Math.max(...ys), 0, vp.height);
+        const b = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+        if (b.w > 6 && b.h > 6 && b.w * b.h < vp.width * vp.height * 0.85) images.push(b);   // ข้ามภาพสแกนเต็มหน้า
+      }
+    }
+  } catch (e) {}
+  try {
+    const tc = await page.getTextContent(); const items = [];
+    for (const it of tc.items) {
+      if (!it.str || !it.str.trim()) continue;
+      const tx = U.transform(vp.transform, it.transform);
+      if (Math.abs(Math.atan2(tx[1], tx[0])) > 0.03) continue;           // ข้ามข้อความแนวเอียง/แนวตั้ง
+      const size = Math.hypot(tx[2], tx[3]); if (size < 2) continue;
+      let fontName = ''; try { if (page.commonObjs.has(it.fontName)) fontName = page.commonObjs.get(it.fontName).name || ''; } catch (e) {}
+      items.push({ str: it.str, x: tx[4], base: tx[5], size, w: Math.abs(it.width), fontName });
+    }
+    items.sort((a, b) => a.base - b.base); const rows = [];
+    for (const it of items) {
+      const r = rows.find(r => Math.abs(r.base - it.base) < Math.max(r.size, it.size) * 0.35 && Math.abs(r.size - it.size) < Math.max(r.size, it.size) * 0.25);
+      if (r) r.items.push(it); else rows.push({ base: it.base, size: it.size, items: [it] });
+    }
+    rows.forEach(r => {
+      r.items.sort((a, b) => a.x - b.x); let cur = null;
+      for (const it of r.items) {
+        const gap = cur ? it.x - (cur.x + cur.w) : 0;
+        if (cur && gap < cur.size * 0.9 && gap > -cur.size * 0.6) {
+          cur.str += (gap > cur.size * 0.18 && !/\s$/.test(cur.str) && !/^\s/.test(it.str) ? ' ' : '') + it.str;
+          cur.w = Math.max(cur.w, it.x + it.w - cur.x);
+        } else { if (cur) texts.push(cur); cur = { ...it }; }
+      }
+      if (cur) texts.push(cur);
+    });
+    texts.forEach((t, k) => { t.key = 't' + k; t.str = t.str.replace(/\s+$/, ''); t.top = t.base - t.size * 1.0; t.h = t.size * 1.34; });
+  } catch (e) {}
+  images.forEach((b, k) => b.key = 'i' + k);
+  return { texts, images };
+}
+async function renderTargets(i) {
+  const pe = pageEls[i], doc = S.doc; if (!CE.on || !pe || !doc) return;
+  const t = await getTargets(i); if (!CE.on || doc !== S.doc) return;
+  const used = new Set(doc.annots[i].map(a => a.srcKey).filter(Boolean)); const z = S.zoom;
+  const box = (cls, key, x, y, w, h, title) => { const d = el('div', 'tgt ' + cls); d.dataset.key = key; d.title = title; Object.assign(d.style, { left: x * z + 'px', top: y * z + 'px', width: w * z + 'px', height: h * z + 'px' }); return d; };
+  pe.tlayer.querySelectorAll('.tgt').forEach(n => n.remove());
+  for (const b of t.images) if (!used.has(b.key)) pe.tlayer.append(box('tgt-img', b.key, b.x, b.y, b.w, b.h, 'คลิกเพื่อย้าย/ปรับขนาด/ลบรูปภาพนี้'));
+  for (const s of t.texts) if (!used.has(s.key)) pe.tlayer.append(box('tgt-text', s.key, s.x - 1, s.top, s.w + 2, s.h, 'คลิกเพื่อแก้ไขข้อความ'));
+}
+async function pageRaster(i) {
+  if (CE.raster && CE.raster.doc === S.doc && CE.raster.i === i) return CE.raster;
+  const page = await S.doc.proxy.getPage(i + 1); const v = page.getViewport({ scale: 1 });
+  let sc = 3; if (v.width * v.height * sc * sc > 24e6) sc = Math.sqrt(24e6 / (v.width * v.height));
+  const vp = page.getViewport({ scale: sc }); const c = canvasOf(vp.width, vp.height); const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  CE.raster = { doc: S.doc, i, canvas: c, ctx, scale: sc }; return CE.raster;
+}
+const toHex = (r, g, b) => '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+// สุ่มสีพื้นหลังจากขอบรอบกล่อง และสีข้อความจากพิกเซลที่ต่างจากพื้นหลังมากที่สุด
+function sampleColors(R, b) {
+  const s = R.scale, W = R.canvas.width, H = R.canvas.height, pad = 3;
+  const x0 = Math.floor(b.x * s), y0 = Math.floor(b.y * s), x1 = Math.ceil((b.x + b.w) * s), y1 = Math.ceil((b.y + b.h) * s);
+  const ax = clamp(x0 - pad, 0, W - 1), ay = clamp(y0 - pad, 0, H - 1), bx = clamp(x1 + pad, ax + 1, W), by = clamp(y1 + pad, ay + 1, H);
+  const d = R.ctx.getImageData(ax, ay, bx - ax, by - ay).data, aw = bx - ax;
+  const px = (x, y) => { const o = ((y - ay) * aw + (x - ax)) * 4; return [d[o], d[o + 1], d[o + 2]]; };
+  const ring = [];
+  for (let x = ax; x < bx; x += 2) { ring.push(px(x, ay)); ring.push(px(x, by - 1)); }
+  for (let y = ay; y < by; y += 2) { ring.push(px(ax, y)); ring.push(px(bx - 1, y)); }
+  const med = ch => { const v = ring.map(p => p[ch]).sort((p, q) => p - q); return v[v.length >> 1] ?? 255; };
+  const bg = [med(0), med(1), med(2)]; let best = null, bd = -1;
+  for (let y = Math.max(ay, y0); y < Math.min(by, y1); y += 1) for (let x = Math.max(ax, x0); x < Math.min(bx, x1); x += 1) {
+    const p = px(x, y); const dist = Math.abs(p[0] - bg[0]) + Math.abs(p[1] - bg[1]) + Math.abs(p[2] - bg[2]);
+    if (dist > bd) { bd = dist; best = p; }
+  }
+  return { bg: toHex(...bg), fg: best && bd > 60 ? toHex(...best) : '#000000' };
+}
+async function removeBgColor(src, hex, tol = 34) {
+  const c = await imageToCanvas(src); const ctx = c.getContext('2d', { willReadFrequently: true }); const im = ctx.getImageData(0, 0, c.width, c.height); const d = im.data;
+  const n = parseInt(hex.slice(1), 16), br = (n >> 16) & 255, bgc = (n >> 8) & 255, bb = n & 255;
+  for (let i = 0; i < d.length; i += 4) { const dist = Math.abs(d[i] - br) + Math.abs(d[i + 1] - bgc) + Math.abs(d[i + 2] - bb); if (dist < tol) d[i + 3] = 0; else if (dist < tol * 2.5) d[i + 3] = Math.round(d[i + 3] * (dist - tol) / (tol * 1.5)); }
+  ctx.putImageData(im, 0, 0); return c.toDataURL('image/png');
+}
+async function convertText(i, t) {
+  const R = await pageRaster(i); const box = { x: t.x - 1, y: t.top, w: t.w + 2, h: t.h }; const col = sampleColors(R, box);
+  const mf = mapPdfFont(t.fontName); const font = mf.font || (/[฀-๿]/.test(t.str) ? 'Sarabun' : 'Arial');
+  await ensureFont(font, mf.bold, t.str);
+  const a = { id: uid(), type: 'text', text: t.str, font, size: t.size, color: col.fg, bold: mf.bold, x: t.x, y: t.base - textBaselineOffset(font, t.size, mf.bold), srcKey: t.key };
+  pushHistory(); S.doc.annots[i].push({ id: uid(), type: 'rect', cover: true, srcKey: t.key, fill: col.bg, opacity: 1, ...box }, a);
+  renderAnnots(i); select(a.id); setTimeout(() => startEditText(a, true), 40);
+}
+async function captureRegion(i, b, { knockout = false, key = null } = {}) {
+  const pg = S.doc.pages[i]; const x0 = clamp(b.x, 0, pg.w), y0 = clamp(b.y, 0, pg.h);
+  b = { x: x0, y: y0, w: clamp(b.x + b.w, 0, pg.w) - x0, h: clamp(b.y + b.h, 0, pg.h) - y0 }; if (b.w < 3 || b.h < 3) return;
+  await busy('กำลังแยกวัตถุ...');
+  try {
+    const R = await pageRaster(i); const s = R.scale; const c = canvasOf(b.w * s, b.h * s);
+    c.getContext('2d').drawImage(R.canvas, b.x * s, b.y * s, b.w * s, b.h * s, 0, 0, c.width, c.height);
+    const col = sampleColors(R, b); let src = c.toDataURL('image/png'); if (knockout) src = await removeBgColor(src, col.bg);
+    const a = { id: uid(), type: 'image', src, x: b.x, y: b.y, w: b.w, h: b.h, opacity: 1, srcKey: key };
+    const cv = { x: b.x - 0.75, y: b.y - 0.75, w: b.w + 1.5, h: b.h + 1.5 };   // ขยายเล็กน้อยกันขอบภาพเดิมโผล่
+    pushHistory(); S.doc.annots[i].push({ id: uid(), type: 'rect', cover: true, srcKey: key, fill: col.bg, opacity: 1, ...cv }, a);
+    renderAnnots(i); select(a.id);
+    toast('ลากเพื่อย้าย • ลากมุมเพื่อปรับขนาด • Delete เพื่อลบออกจากเอกสาร');
+  } finally { unbusy(); }
+}
+async function onTarget(i, key) {
+  const t = await getTargets(i);
+  if (key[0] === 't') { const s = t.texts.find(x => x.key === key); if (s) await convertText(i, s); }
+  else { const b = t.images.find(x => x.key === key); if (b) await captureRegion(i, b, { key }); }
+}
+function startBand(e, i) {
+  const pe = pageEls[i], z = S.zoom, r = pe.wrap.getBoundingClientRect();
+  const x0 = (e.clientX - r.left) / z, y0 = (e.clientY - r.top) / z; const band = el('div', 'band'); pe.tlayer.append(band); let b = null;
+  const move = ev => {
+    const x = (ev.clientX - r.left) / z, y = (ev.clientY - r.top) / z;
+    b = { x: Math.min(x0, x), y: Math.min(y0, y), w: Math.abs(x - x0), h: Math.abs(y - y0) };
+    Object.assign(band.style, { left: b.x * z + 'px', top: b.y * z + 'px', width: b.w * z + 'px', height: b.h * z + 'px' });
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+    band.remove(); if (b && b.w > 4 && b.h > 4) captureRegion(i, b, { knockout: true });
+  };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+}
 
 /* =============================================================
    การฝังองค์ประกอบลงไฟล์ PDF
@@ -1487,8 +1753,9 @@ function renderTextImage(a, k = 4) {
   const c = document.createElement('canvas'); const ctx = c.getContext('2d'); const font = fontCss(a.font, fs, a.bold);
   ctx.font = font; const tw = Math.max(1, ...lines.map(l => ctx.measureText(l).width));
   c.width = Math.ceil(tw + pad * 2 * k); c.height = Math.ceil(lh * lines.length + pad * 2 * k);
-  ctx.font = font; ctx.fillStyle = a.color; ctx.textBaseline = 'middle';
-  lines.forEach((l, j) => ctx.fillText(l, pad * k, pad * k + lh * (j + 0.5)));
+  const bo = textBaselineOffset(a.font, fs, a.bold);
+  ctx.font = font; ctx.fillStyle = a.color; ctx.textBaseline = 'alphabetic';
+  lines.forEach((l, j) => ctx.fillText(l, pad * k, pad * k + lh * j + bo));
   return { src: c.toDataURL('image/png'), pad, w: c.width / k, h: c.height / k };
 }
 async function burnAnnotsInto(pdfDoc, annotsByPage) {
@@ -1496,7 +1763,7 @@ async function burnAnnotsInto(pdfDoc, annotsByPage) {
   for (let i = 0; i < pages.length; i++) {
     const list = annotsByPage[i]; if (!list || !list.length) continue;
     const page = pages[i]; const rot = (((page.getRotation().angle || 0) % 360) + 360) % 360; const box = page.getCropBox();
-    for (const a of list) {
+    for (const a of ordered(list)) {
       let { src, x, y, w, h } = a;
       if (a.type === 'text') { await ensureFont(a.font, a.bold, a.text); const r = renderTextImage(a); src = r.src; x -= r.pad; y -= r.pad; w = r.w; h = r.h; }
       const p = toPdfPoint(x, y + h, rot, box);
@@ -1563,7 +1830,14 @@ function watermarkImage(s) {
   lines.forEach((l, j) => ctx.fillText(l, 0, (j - (lines.length - 1) / 2) * fs * LH));
   const img = { src: c.toDataURL('image/png'), w: c.width, h: c.height, tw }; wmCache = { key, img }; return img;
 }
-function measureTextWidth(text, font, size, bold) { const c = measureTextWidth.c || (measureTextWidth.c = document.createElement('canvas').getContext('2d')); c.font = fontCss(font, size, bold); return Math.max(...text.split('\n').map(l => c.measureText(l).width)); }
+const measureCtx = () => measureCtx.c || (measureCtx.c = document.createElement('canvas').getContext('2d'));
+function measureTextWidth(text, font, size, bold) { const c = measureCtx(); c.font = fontCss(font, size, bold); return Math.max(...text.split('\n').map(l => c.measureText(l).width)); }
+// ระยะจากขอบบนของบรรทัด (line-height 1.3) ถึง baseline — ให้ตรงกับการแสดงผลใน DOM
+function textBaselineOffset(font, size, bold) {
+  const c = measureCtx(); c.font = fontCss(font, size, bold); const m = c.measureText('กHgป');
+  const asc = m.fontBoundingBoxAscent ?? size * 0.95, desc = m.fontBoundingBoxDescent ?? size * 0.3;
+  return (size * LH - (asc + desc)) / 2 + asc;
+}
 function stampAnnots(i) {
   const out = []; const pg = S.doc.pages[i]; const w = wmSettings(), p = pnSettings();
   if (w.on && w.text.trim()) {
@@ -2086,7 +2360,12 @@ document.addEventListener('keydown', e => {
     if (mod && e.key === '-') { e.preventDefault(); zoomStep(-1); return; }
     if (mod && e.key === '0') { e.preventDefault(); S.fitMode = 'page'; applyFit(); return; }
   }
-  if (e.key === 'Escape') { if (S.pending) stopPlacing(); else select(null); return; }
+  if (e.key === 'Escape') { if (!$('#ctxMenu').hidden) hideCtx(); else if (S.pending) stopPlacing(); else if (S.selected != null) select(null); else if (CE.on) setContentEdit(false); return; }
+  if (S.tool === 'edit' && S.selected != null && mod) {
+    if (e.code === 'BracketRight') { e.preventDefault(); arrange(e.shiftKey ? 'front' : 'forward'); return; }
+    if (e.code === 'BracketLeft') { e.preventDefault(); arrange(e.shiftKey ? 'back' : 'backward'); return; }
+    if (k === 'd') { e.preventDefault(); duplicateSel(); return; }
+  }
   if (S.tool === 'edit' && S.selected != null) {
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteAnnot(S.selected); return; }
     const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
