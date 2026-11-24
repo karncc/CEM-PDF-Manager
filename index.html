@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-SgCagVClzjqdie9B3mPIfAKEZ2B36H0j7lvcQWFi0IA=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-J75eINnr9WsgbpXLoyhHYxMzGYam/K1FKqzkp7FE/n8=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>CEM PDF Manager</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -132,7 +132,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ======================= Layout ======================= */
-.main { display: flex; min-height: 0; min-width: 0; position: relative; overflow: hidden; }
+.main { display: grid; grid-template-columns: auto auto minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0; min-width: 0; position: relative; overflow: hidden; overflow: clip; }
 .rail { width: 78px; flex: none; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 8px 6px; gap: 2px; overflow-y: auto; }
 .rail-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 2px 8px; border: 0; background: none; border-radius: 8px; color: var(--text-2); font-size: 11px; line-height: 1.25; cursor: pointer; text-align: center; }
 .rail-btn svg { width: 22px; height: 22px; }
@@ -204,8 +204,8 @@ body.has-panel .panel { display: block; }
 .home-footer .ai-note { font-size: 11.5px; font-style: italic; }
 
 /* ======================= Document viewer ======================= */
-.thumbs { width: 176px; flex: none; overflow-y: auto; background: var(--surface-2); border-right: 1px solid var(--border); padding: 14px 18px; }
-.thumbs.collapsed { display: none; }
+.thumbs { width: 176px; flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--surface-2); border-right: 1px solid var(--border); }
+.thumb-list { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px; }
 .thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px; border-radius: 8px; cursor: pointer; margin-bottom: 6px; }
 .thumb:hover { background: var(--hover); }
 .thumb-sheet { width: 100%; background: #fff; box-shadow: var(--page-shadow); border: 2px solid transparent; overflow: hidden; }
@@ -214,7 +214,7 @@ body.has-panel .panel { display: block; }
 .thumb-num { font-size: 12px; color: var(--text-2); }
 .thumb.active .thumb-num { color: var(--accent-text); font-weight: 700; }
 
-.viewer-wrap { flex: 1; min-width: 0; position: relative; display: flex; }
+.viewer-wrap { flex: 1; min-width: 0; min-height: 0; position: relative; display: flex; }
 .viewer { flex: 1; min-width: 0; min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; }
 #pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 24px 110px; width: max-content; min-width: 100%; position: relative; }
 .page { position: relative; background: #fff; box-shadow: var(--page-shadow); flex: none; }
@@ -403,6 +403,76 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 #dropOverlay.open { display: flex; }
 #dropOverlay div { background: var(--surface); color: var(--accent-text); padding: 18px 28px; border-radius: 14px; font-size: 17px; font-weight: 700; box-shadow: var(--pop-shadow); }
 
+/* ======================= จัดวางเมนู (ยึดซ้าย / ขวา / ล่าง / ลอย / ซ่อน) ======================= */
+body[data-rail="right"] .rail { border-right: 0; border-left: 1px solid var(--border); }
+body[data-rail="bottom"] .rail { width: auto; flex-direction: row; justify-content: center; border-right: 0; border-top: 1px solid var(--border); padding: 4px 8px; overflow-x: auto; overflow-y: hidden; }
+body[data-rail="bottom"] .rail-btn { min-width: 76px; flex: none; padding: 6px 4px; }
+body[data-rail="bottom"] .rail-sep { width: 1px; height: auto; margin: 6px 4px; }
+body[data-rail="hidden"] .rail { display: none; }
+body[data-panel="right"] .panel { border-right: 0; border-left: 1px solid var(--border); }
+body[data-panel="bottom"] .panel { width: auto; height: 260px; border-right: 0; border-top: 1px solid var(--border); }
+body[data-panel="bottom"] .panel-sec.active { column-width: 280px; column-gap: 28px; }
+body[data-panel="bottom"] .panel-sec.active > * { break-inside: avoid; }
+body[data-panel="hidden"] .panel { display: none !important; }
+body[data-thumbs="right"] .thumbs { order: 3; border-right: 0; border-left: 1px solid var(--border); }
+body[data-thumbs="bottom"] #docView { flex-direction: column; }
+body[data-thumbs="bottom"] .thumbs { order: 3; width: auto; height: 158px; border-right: 0; border-top: 1px solid var(--border); }
+body[data-thumbs="bottom"] .thumb-list { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; padding: 8px 14px; }
+body[data-thumbs="bottom"] .thumb { width: 74px; flex: none; margin: 0; }
+body[data-thumbs="hidden"] .thumbs { display: none; }
+/* หน้าต่างลอย */
+.floating { position: fixed !important; z-index: 45; border: 1px solid var(--border-strong) !important; border-radius: 12px; box-shadow: var(--pop-shadow); }
+.floating.dragging { opacity: .92; }
+.dock-head { display: none; align-items: center; gap: 2px; height: 30px; padding: 0 4px 0 6px; border-bottom: 1px solid var(--border); background: var(--surface-2); cursor: move; flex: none; user-select: none; touch-action: none; position: sticky; top: 0; z-index: 2; }
+.floating > .dock-head { display: flex; }
+.dock-head .dh-grip { display: grid; color: var(--text-3); }
+.dock-head .dh-grip svg, .fb-grip svg { width: 14px; height: 14px; }
+.dock-head .dh-title { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock-head .icon-btn { width: 24px; height: 24px; border-radius: 6px; }
+.dock-head .icon-btn svg { width: 14px; height: 14px; }
+body[data-rail="float"] .rail { width: 84px; height: auto; max-height: calc(100vh - 80px); padding: 0 6px 8px; overflow-y: auto; }
+.rail > .dock-head { margin: 0 -6px 6px; padding: 0 2px 0 4px; }
+body[data-panel="float"] .panel { width: 320px; height: 70vh; min-width: 240px; min-height: 160px; resize: both; overflow: auto; }
+body[data-thumbs="float"] .thumbs { width: 190px; height: 60vh; min-width: 120px; min-height: 150px; resize: both; overflow: hidden; }
+/* ปุ่มจัดวางมุมบนขวาของแต่ละกล่อง */
+.dock-menu { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-3); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; z-index: 3; opacity: .85; }
+.dock-menu:hover { opacity: 1; color: var(--accent-text); border-color: var(--accent); }
+.dock-menu svg { width: 15px; height: 15px; }
+.floating > .dock-menu { display: none; }
+.rail > .dock-menu { align-self: flex-end; width: 22px; height: 22px; margin: -2px -2px 2px 0; }
+.rail > .dock-menu svg { width: 13px; height: 13px; }
+body[data-rail="bottom"] .rail { position: relative; }
+body[data-rail="bottom"] .rail > .dock-menu { position: absolute; top: 6px; right: 8px; margin: 0; }
+.panel > .dock-menu { position: sticky; top: 8px; float: right; margin: 8px 8px -34px 0; }
+.panel-head h2 { padding-right: 30px; }
+.thumbs { position: relative; }
+.thumbs > .dock-menu { position: absolute; top: 6px; right: 6px; }
+#layoutPop[data-only] { width: 340px; }
+#layoutPop[data-only] .lp-row:not(.lp-only), #layoutPop[data-only] .lp-actions, #layoutPop[data-only] > p { display: none !important; }
+#layoutPop[data-only] .lp-row > label { display: none; }
+#layoutPop[data-only] .lp-row { margin-bottom: 0; }
+/* แถบควบคุมเอกสาร */
+.fb-grip { display: none; place-items: center; width: 18px; height: 32px; color: var(--text-3); cursor: move; touch-action: none; }
+body[data-fbar="float"] .fb-grip { display: grid; }
+body[data-fbar="float"] .floatbar.moved { transform: none; bottom: auto; }
+body[data-fbar="top"] .floatbar { top: 14px; bottom: auto; }
+body[data-fbar="top"] #pages { padding-top: 76px; }
+body[data-fbar="top"] .rot-pop { top: 66px; bottom: auto; }
+body[data-fbar="top"] .place-banner { top: 70px; }
+body[data-fbar="hidden"] .floatbar { display: none; }
+/* เมนูจัดวาง */
+.layout-pop { position: fixed; z-index: 2100; width: 360px; max-width: calc(100vw - 16px); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--pop-shadow); padding: 14px; }
+.layout-pop h4 { margin: 0 0 12px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
+.layout-pop h4 .icon-btn { width: 28px; height: 28px; }
+.lp-row { margin-bottom: 10px; }
+.lp-row > label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+.lp-row .seg { margin-bottom: 0; }
+.lp-row .seg button { font-size: 12.5px; padding: 6px 2px; }
+.lp-actions { display: flex; gap: 6px; margin-top: 12px; }
+.lp-actions .btn { flex: 1; font-size: 12.5px; }
+.lp-actions kbd { font-size: 11px; color: var(--text-3); margin-left: 4px; font-family: inherit; }
+#btnLayout.active { background: var(--accent-soft); color: var(--accent-text); }
+
 /* ======================= Responsive ======================= */
 @media (max-width: 900px) {
   .only-mobile { display: inline-grid !important; }
@@ -414,6 +484,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
   body.has-panel .panel { display: none; }
   body.has-panel.panel-open .panel { display: block; position: absolute; z-index: 60; top: 0; bottom: 0; left: 64px; width: min(320px, calc(100vw - 64px)); box-shadow: var(--pop-shadow); }
   .thumbs { display: none; }
+  .dock-menu { display: none !important; }
   #pages { padding: 14px 12px 100px; }
   .grid-scroll { padding: 14px; }
   .size-slider { display: none; }
@@ -447,6 +518,7 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
       <span class="vsep"></span>
       <button class="btn btn-ghost" id="btnOpen" title="เปิดไฟล์ (Ctrl+O)" data-icon="folder"><span class="btn-label">เปิด</span></button>
       <button class="icon-btn" id="btnPrint" title="พิมพ์ (Ctrl+P)" data-icon="printer" disabled></button>
+      <button class="icon-btn" id="btnLayout" title="จัดวางเมนู (Ctrl+\ ซ่อน/แสดงทั้งหมด)" data-icon="layout"></button>
       <button class="btn btn-ghost lang-btn" id="btnLang" title="Language / ภาษา">EN</button>
       <button class="icon-btn" id="btnTheme" title="สลับโหมดมืด/สว่าง"></button>
       <button class="btn btn-primary" id="btnDownload" title="ดาวน์โหลด (Ctrl+S)" data-icon="download" disabled><span class="btn-label">ดาวน์โหลด</span></button>
@@ -752,12 +824,13 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 
       <!-- โปรแกรมดูเอกสาร -->
       <section class="view" id="docView">
-        <div class="thumbs" id="thumbs"></div>
+        <div class="thumbs" id="thumbsDock"><div class="thumb-list" id="thumbs"></div></div>
         <div class="viewer-wrap">
           <div class="viewer" id="viewer"><div id="pages"></div></div>
           <div class="place-banner" id="ceBanner" hidden><span>แก้ไขเนื้อหาเดิม — คลิกข้อความ/รูป หรือลากคลุมพื้นที่</span><button id="ceExit">เสร็จสิ้น</button></div>
           <div class="place-banner" id="placeHint" hidden><span id="placeHintText">คลิกบนหน้าเอกสารเพื่อวาง</span><button id="placeCancel">ยกเลิก (Esc)</button></div>
           <div class="floatbar" id="floatbar">
+            <span class="fb-grip" title="ลากเพื่อย้าย" data-icon="grip"></span>
             <button class="icon-btn active" id="fbThumbs" title="แสดง/ซ่อนภาพย่อ" data-icon="sidebar"></button>
             <span class="vsep"></span>
             <button class="icon-btn" id="fbPrev" title="หน้าก่อนหน้า" data-icon="chevronUp"></button>
@@ -931,6 +1004,17 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
   </div>
 </div>
 
+<div class="layout-pop" id="layoutPop" hidden>
+  <h4><span id="layoutTitle">จัดวางเมนู</span> <button class="icon-btn" id="layoutClose" data-icon="x" title="ปิด"></button></h4>
+  <div class="lp-row"><label>แถบเครื่องมือ</label><div class="seg" data-lp="rail"><button data-v="left">ซ้าย</button><button data-v="right">ขวา</button><button data-v="bottom">ล่าง</button><button data-v="float">ลอย</button><button data-v="hidden">ซ่อน</button></div></div>
+  <div class="lp-row"><label>แผงตัวเลือก</label><div class="seg" data-lp="panel"><button data-v="left">ซ้าย</button><button data-v="right">ขวา</button><button data-v="bottom">ล่าง</button><button data-v="float">ลอย</button><button data-v="hidden">ซ่อน</button></div></div>
+  <div class="lp-row"><label>ภาพย่อหน้า (พรีวิว)</label><div class="seg" data-lp="thumbs"><button data-v="left">ซ้าย</button><button data-v="right">ขวา</button><button data-v="bottom">ล่าง</button><button data-v="float">ลอย</button><button data-v="hidden">ซ่อน</button></div></div>
+  <div class="lp-row"><label>แถบควบคุมเอกสาร</label><div class="seg" data-lp="fbar"><button data-v="bottom">ล่าง</button><button data-v="top">บน</button><button data-v="float">ลอย</button><button data-v="hidden">ซ่อน</button></div></div>
+  <div class="lp-actions"><button class="btn sm" id="layoutFocus">ซ่อนทั้งหมด<kbd>Ctrl+\</kbd></button><button class="btn sm" id="layoutReset">คืนค่าเริ่มต้น</button></div>
+  <p class="muted small" style="margin:10px 0 0" id="layoutNote">ลากแถบหัวของหน้าต่างลอยเพื่อย้ายตำแหน่ง • คลิกขวาที่แถบเครื่องมือหรือภาพย่อเพื่อเปิดเมนูนี้</p>
+  <p class="muted small" style="margin:6px 0 0" id="layoutMobileNote" hidden>หน้าจอขนาดเล็กจะใช้การจัดวางมาตรฐานชั่วคราว</p>
+</div>
+
 <div class="ctx" id="ctxMenu" hidden>
   <button data-cmd="front" data-icon="toFront">นำไปไว้หน้าสุด<kbd>Ctrl+Shift+]</kbd></button>
   <button data-cmd="forward" data-icon="forward">นำไปข้างหน้า<kbd>Ctrl+]</kbd></button>
@@ -998,6 +1082,8 @@ const ICONS = {
   filePlus: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15h6"/>',
   extract: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v7M9 15l3 3 3-3"/>',
   sidebar: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>',
+  layout: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+  grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
   sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
   fitPage: '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
   fitWidth: '<path d="M3 12h18"/><path d="m7 8-4 4 4 4"/><path d="m17 8 4 4-4 4"/>',
@@ -1272,7 +1358,7 @@ async function switchTool(t) {
   $$('.view').forEach(v => v.classList.toggle('active', v.id === VIEW_OF[t]));
   if (t !== 'edit') select(null);
 
-  if (VIEW_OF[t] === 'docView') { renderAllAnnots(); requestAnimationFrame(() => applyFit()); }
+  if (VIEW_OF[t] === 'docView') { renderAllAnnots(); requestAnimationFrame(() => { clampFloatbar(); applyFit(); }); }
   if (t === 'organize') await enterOrganize();
   if (t === 'split') renderSplit();
   if (t === 'combine' || t === 'convert') renderList();
@@ -1391,7 +1477,13 @@ function goToPage(i, smooth = true) {
 function setCurPage(i) {
   S.curPage = i; $('#pageInput').value = i + 1;
   $$('#thumbs .thumb').forEach(t => t.classList.toggle('active', +t.dataset.index === i));
-  const t = $(`#thumbs .thumb[data-index="${i}"]`); if (t) t.scrollIntoView({ block: 'nearest' });
+  // เลื่อนเฉพาะรายการภาพย่อ (scrollIntoView จะเลื่อนกรอบแม่ทุกชั้นด้วย)
+  const t = $(`#thumbs .thumb[data-index="${i}"]`), box = $('#thumbs');
+  if (t && box.clientHeight) {
+    const tr_ = t.getBoundingClientRect(), br = box.getBoundingClientRect();
+    if (tr_.top < br.top) box.scrollTop += tr_.top - br.top - 8; else if (tr_.bottom > br.bottom) box.scrollTop += tr_.bottom - br.bottom + 8;
+    if (tr_.left < br.left) box.scrollLeft += tr_.left - br.left - 8; else if (tr_.right > br.right) box.scrollLeft += tr_.right - br.right + 8;
+  }
 }
 viewer.addEventListener('scroll', () => { if (!S.doc) return; const c = currentPageFromScroll(); if (c !== S.curPage) setCurPage(c); }, { passive: true });
 viewer.addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey) || !S.doc) return; e.preventDefault(); S.fitMode = null; setZoom(S.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); }, { passive: false });
@@ -1404,8 +1496,148 @@ $('#fbZoomOut').onclick = () => zoomStep(-1);
 $('#zoomLabel').onclick = () => { S.fitMode = 'width'; applyFit(); };
 $('#fbFitW').onclick = () => { S.fitMode = 'width'; applyFit(); };
 $('#fbFitP').onclick = () => { S.fitMode = 'page'; applyFit(); goToPage(S.curPage, false); };
-$('#fbThumbs').onclick = () => { const c = $('#thumbs').classList.toggle('collapsed'); $('#fbThumbs').classList.toggle('active', !c); storage.set('cem_thumbs', !c); requestAnimationFrame(applyFit); };
-if (storage.get('cem_thumbs', true) === false) { $('#thumbs').classList.add('collapsed'); $('#fbThumbs').classList.remove('active'); }
+/* ---------- จัดวางเมนู: ยึดซ้าย / ขวา / ล่าง / ลอย / ซ่อน (จำค่าไว้ในเครื่อง) ---------- */
+const LAYOUT_DEF = { rail: 'left', panel: 'left', thumbs: 'left', fbar: 'bottom', focus: false };
+const LAYOUT_OPTS = { rail: ['left', 'right', 'bottom', 'float', 'hidden'], panel: ['left', 'right', 'bottom', 'float', 'hidden'], thumbs: ['left', 'right', 'bottom', 'float', 'hidden'], fbar: ['bottom', 'top', 'float', 'hidden'] };
+const L = (() => {
+  const saved = storage.get('cem_layout', null); const l = { ...LAYOUT_DEF, pos: {}, last: { thumbs: 'left' }, ...(saved && typeof saved === 'object' ? saved : {}) };
+  if (!saved && storage.get('cem_thumbs', true) === false) l.thumbs = 'hidden';
+  for (const k in LAYOUT_OPTS) if (!LAYOUT_OPTS[k].includes(l[k])) l[k] = LAYOUT_DEF[k];
+  if (!l.pos || typeof l.pos !== 'object') l.pos = {}; if (!l.last || typeof l.last !== 'object') l.last = { thumbs: 'left' };
+  l.focus = !!l.focus; return l;
+})();
+const DOCK_EL = { rail: () => $('#rail'), panel: () => $('#panel'), thumbs: () => $('#thumbsDock') };
+const saveLayout = () => storage.set('cem_layout', L);
+function effLayout() {
+  if (isMobile()) return { rail: 'left', panel: 'left', thumbs: 'left', fbar: L.fbar === 'hidden' ? 'hidden' : 'bottom' };
+  const e = { rail: L.rail, panel: L.panel, thumbs: L.thumbs, fbar: L.fbar };
+  if (L.focus) e.rail = e.panel = e.thumbs = 'hidden';
+  return e;
+}
+const defaultFloatPos = k => ({ rail: { x: 12, y: 64 }, panel: { x: 110, y: 70 }, thumbs: { x: Math.max(12, innerWidth - 220), y: 70 } })[k];
+function applyLayout() {
+  const e = effLayout(), b = document.body, mob = isMobile();
+  b.dataset.rail = e.rail; b.dataset.panel = e.panel; b.dataset.thumbs = e.thumbs; b.dataset.fbar = e.fbar;
+  for (const k of ['rail', 'panel', 'thumbs']) {
+    const d = DOCK_EL[k](); const fl = e[k] === 'float';
+    d.classList.toggle('floating', fl); d.style.gridColumn = d.style.gridRow = '';
+    if (fl) {
+      const p = L.pos[k] || defaultFloatPos(k);
+      d.style.left = clamp(p.x, -100, innerWidth - 80) + 'px'; d.style.top = clamp(p.y, 4, innerHeight - 40) + 'px';
+      if (k !== 'rail' && p.w && p.h) { d.style.width = p.w + 'px'; d.style.height = p.h + 'px'; } else { d.style.width = d.style.height = ''; }
+    } else d.style.left = d.style.top = d.style.width = d.style.height = '';
+  }
+  // ตารางของพื้นที่หลัก: [ซ้าย…] เอกสาร [ขวา…] / แถวล่าง — แถบเครื่องมืออยู่ด้านนอกสุดเสมอ
+  const side = (pos, order) => order.filter(k => e[k] === pos && !(mob && k === 'panel'));
+  const left = side('left', ['rail', 'panel']), right = side('right', ['panel', 'rail']), bottom = side('bottom', ['panel', 'rail']);
+  const main = $('.main'), stage = $('.stage');
+  main.style.gridTemplateColumns = [...left.map(() => 'auto'), 'minmax(0, 1fr)', ...right.map(() => 'auto')].join(' ');
+  main.style.gridTemplateRows = ['minmax(0, 1fr)', ...bottom.map(() => 'auto')].join(' ');
+  const place = (el, c, r) => { el.style.gridColumn = c; el.style.gridRow = r; };
+  left.forEach((k, i) => place(DOCK_EL[k](), String(i + 1), '1'));
+  place(stage, String(left.length + 1), '1');
+  right.forEach((k, j) => place(DOCK_EL[k](), String(left.length + 2 + j), '1'));
+  bottom.forEach((k, r) => place(DOCK_EL[k](), '1 / -1', String(2 + r)));
+  // แถบควบคุมเอกสาร
+  const fb = $('#floatbar'), fp = L.pos.fbar;
+  if (e.fbar === 'float' && fp) { fb.classList.add('moved'); fb.style.left = fp.x + 'px'; fb.style.top = fp.y + 'px'; clampFloatbar(); }
+  else { fb.classList.remove('moved'); fb.style.left = fb.style.top = ''; }
+  syncLayoutUI();
+  if (S.doc && VIEW_OF[S.tool] === 'docView') requestAnimationFrame(() => applyFit());
+}
+function clampFloatbar() {
+  const fb = $('#floatbar'), w = fb.parentElement; if (!fb.classList.contains('moved') || !w.clientWidth) return;
+  fb.style.left = clamp(parseFloat(fb.style.left) || 0, 0, Math.max(0, w.clientWidth - fb.offsetWidth)) + 'px';
+  fb.style.top = clamp(parseFloat(fb.style.top) || 0, 0, Math.max(0, w.clientHeight - fb.offsetHeight)) + 'px';
+}
+function syncLayoutUI() {
+  const e = effLayout();
+  $$('#layoutPop [data-lp]').forEach(g => g.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.v === e[g.dataset.lp])));
+  $('#fbThumbs').classList.toggle('active', e.thumbs !== 'hidden');
+  $('#btnLayout').classList.toggle('active', L.focus);
+  $('#layoutFocus').firstChild.textContent = L.focus ? 'แสดงทั้งหมด' : 'ซ่อนทั้งหมด';
+  $('#layoutMobileNote').hidden = !isMobile();
+}
+function setLayout(k, v) {
+  if (!LAYOUT_OPTS[k].includes(v)) return;
+  if (k === 'thumbs' && v !== 'hidden') L.last.thumbs = v;
+  const wasFocus = L.focus;
+  if (L.focus && v !== 'hidden' && k !== 'fbar') { L.focus = false; for (const x of ['rail', 'panel', 'thumbs']) if (x !== k && L[x] === 'hidden') L[x] = LAYOUT_DEF[x]; }
+  L[k] = v; saveLayout(); applyLayout();
+  if (v === 'hidden' && (k === 'rail' || k === 'panel') && !wasFocus) toast('เปิดกลับได้จากปุ่ม "จัดวางเมนู" ที่แถบด้านบน');
+}
+function toggleFocusLayout() {
+  L.focus = !L.focus; saveLayout(); applyLayout();
+  toast(L.focus ? 'ซ่อนเมนูทั้งหมดแล้ว — กด Ctrl+\\ อีกครั้งเพื่อแสดง' : 'แสดงเมนูแล้ว');
+}
+// ลากหน้าต่างลอย (within = กรอบที่ต้องอยู่ข้างใน สำหรับแถบควบคุมเอกสาร)
+function startFloatDrag(ev, key, el, within) {
+  if (ev.button !== 0 || ev.target.closest('button')) return;
+  ev.preventDefault();
+  const r = el.getBoundingClientRect(), base = within ? within.getBoundingClientRect() : { left: 0, top: 0 };
+  const ox = ev.clientX - r.left, oy = ev.clientY - r.top;
+  el.classList.add('dragging'); if (key === 'fbar') el.classList.add('moved');
+  const move = e => {
+    const W = within ? within.clientWidth : innerWidth, H = within ? within.clientHeight : innerHeight;
+    const x = clamp(e.clientX - ox - base.left, within ? 0 : 60 - r.width, W - (within ? r.width : 60));
+    const y = clamp(e.clientY - oy - base.top, within ? 0 : 4, H - (within ? r.height : 32));
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+  };
+  move(ev);
+  const up = () => {
+    removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+    el.classList.remove('dragging');
+    L.pos[key] = { ...(L.pos[key] || {}), x: Math.round(parseFloat(el.style.left)), y: Math.round(parseFloat(el.style.top)) }; saveLayout();
+  };
+  addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+}
+[['rail', ''], ['panel', 'ตัวเลือกเครื่องมือ'], ['thumbs', 'ภาพย่อหน้า']].forEach(([k, title]) => {
+  const h = el('div', 'dock-head', `<span class="dh-grip" title="ลากเพื่อย้าย">${icon('grip')}</span><span class="dh-title">${title}</span>${k === 'rail' ? '' : `<button class="icon-btn" data-lpopen title="จัดวางเมนู">${icon('layout')}</button>`}<button class="icon-btn" data-dock="left" title="ยึดกลับด้านซ้าย">${icon('sidebar')}</button><button class="icon-btn" data-dock="hidden" title="ซ่อน">${icon('x')}</button>`);
+  h.addEventListener('pointerdown', e => startFloatDrag(e, k, DOCK_EL[k]()));
+  h.querySelectorAll('[data-dock]').forEach(b => b.onclick = () => setLayout(k, b.dataset.dock));
+  const m = el('button', 'dock-menu', icon('layout')); m.type = 'button'; m.title = 'จัดวางเมนู'; m.dataset.lpopen = '';
+  DOCK_EL[k]().prepend(h, m);
+  DOCK_EL[k]().querySelectorAll('[data-lpopen]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openLayoutPopAt(e.currentTarget, k); }));
+});
+$('#floatbar .fb-grip').addEventListener('pointerdown', e => startFloatDrag(e, 'fbar', $('#floatbar'), $('#floatbar').parentElement));
+// จำขนาดหน้าต่างลอยที่ผู้ใช้ปรับ
+const floatRO = new ResizeObserver(es => es.forEach(en => {
+  const t = en.target; if (!t.classList.contains('floating') || t.classList.contains('dragging')) return;
+  const k = t.id === 'panel' ? 'panel' : 'thumbs'; const w = t.offsetWidth, h = t.offsetHeight; if (!w || !h) return;
+  const p = L.pos[k] || defaultFloatPos(k); if (p.w === w && p.h === h) return;
+  L.pos[k] = { ...p, w, h }; clearTimeout(floatRO.t); floatRO.t = setTimeout(saveLayout, 300);
+}));
+floatRO.observe($('#panel')); floatRO.observe($('#thumbsDock'));
+// เมนูจัดวาง
+// only = แสดงเฉพาะแถวของกล่องนั้น (เปิดจากไอคอนมุมกล่อง / คลิกขวา) — ไม่ระบุ = แสดงทุกกล่อง (ปุ่มที่แถบด้านบน)
+function openLayoutPop(x, y, only) {
+  const p = $('#layoutPop'); p.hidden = false;
+  if (only) p.dataset.only = only; else delete p.dataset.only;
+  $$('#layoutPop .lp-row').forEach(row => row.classList.toggle('lp-only', !!only && row.querySelector('[data-lp]')?.dataset.lp === only));
+  $('#layoutTitle').textContent = only ? { rail: 'จัดวางแถบเครื่องมือ', panel: 'จัดวางแผงตัวเลือก', thumbs: 'จัดวางภาพย่อหน้า' }[only] : 'จัดวางเมนู';
+  syncLayoutUI();
+  const r = p.getBoundingClientRect(); p.style.left = clamp(x, 8, innerWidth - r.width - 8) + 'px'; p.style.top = clamp(y, 8, innerHeight - r.height - 8) + 'px';
+}
+// เปิดเมนูจัดวางของกล่องนั้นใกล้ปุ่มที่กด
+function openLayoutPopAt(btn, key) {
+  const r = btn.getBoundingClientRect(); const right = r.left + r.width / 2 > innerWidth / 2;
+  openLayoutPop(-9999, -9999, key); const p = $('#layoutPop'), pr = p.getBoundingClientRect();
+  const x = right ? r.right - pr.width : r.left, y = r.bottom + 6 + pr.height > innerHeight ? r.top - 6 - pr.height : r.bottom + 6;
+  p.style.left = clamp(x, 8, innerWidth - pr.width - 8) + 'px'; p.style.top = clamp(y, 8, innerHeight - pr.height - 8) + 'px';
+}
+$('#btnLayout').onclick = e => { const p = $('#layoutPop'); if (!p.hidden) { p.hidden = true; return; } const r = e.currentTarget.getBoundingClientRect(); openLayoutPop(r.right - 360, r.bottom + 6); };
+$('#layoutClose').onclick = () => { $('#layoutPop').hidden = true; };
+$$('#layoutPop [data-lp] button').forEach(b => b.onclick = () => { const p = $('#layoutPop'); if (p.dataset.only) p.hidden = true; setLayout(b.parentElement.dataset.lp, b.dataset.v); });
+$('#layoutFocus').onclick = toggleFocusLayout;
+$('#layoutReset').onclick = () => { Object.assign(L, LAYOUT_DEF, { pos: {}, last: { thumbs: 'left' } }); saveLayout(); applyLayout(); toast('คืนค่าการจัดวางเริ่มต้นแล้ว', 'success'); };
+document.addEventListener('pointerdown', e => { const p = $('#layoutPop'); if (!p.hidden && !p.contains(e.target) && !e.target.closest('#btnLayout')) p.hidden = true; }, true);
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.code === 'Backslash') && !$('.modal.open')) { e.preventDefault(); toggleFocusLayout(); return; }
+  if (e.key === 'Escape' && !$('#layoutPop').hidden) { e.stopImmediatePropagation(); $('#layoutPop').hidden = true; }
+}, true);
+[['#rail', 'rail'], ['#thumbsDock', 'thumbs']].forEach(([sel, k]) => $(sel).addEventListener('contextmenu', e => { if (isMobile()) return; e.preventDefault(); openLayoutPop(e.clientX, e.clientY, k); }));
+let layoutRAF = 0; window.addEventListener('resize', () => { cancelAnimationFrame(layoutRAF); layoutRAF = requestAnimationFrame(applyLayout); });
+$('#fbThumbs').onclick = () => setLayout('thumbs', effLayout().thumbs === 'hidden' ? (L.last.thumbs || 'left') : 'hidden');
 $('#pageInput').addEventListener('keydown', e => { if (e.key === 'Enter') { const n = parseInt(e.target.value, 10); if (n) goToPage(n - 1); e.target.blur(); } });
 
 /* ---------- การหมุนเอกสาร ---------- */
@@ -2667,6 +2899,15 @@ window.addEventListener('beforeunload', e => { if (S.doc && S.dirty) { e.prevent
    ============================================================= */
 const TH_RE = /[฀-๿]/;
 const EN = {
+  'จัดวางเมนู': 'Layout', 'จัดวางแถบเครื่องมือ': 'Tool bar position', 'จัดวางแผงตัวเลือก': 'Options panel position', 'จัดวางภาพย่อหน้า': 'Thumbnails position','จัดวางเมนู (Ctrl+\\ ซ่อน/แสดงทั้งหมด)': 'Layout (Ctrl+\\ hide/show all)', 'แถบเครื่องมือ': 'Tool bar', 'แผงตัวเลือก': 'Options panel',
+  'ภาพย่อหน้า (พรีวิว)': 'Page thumbnails', 'แถบควบคุมเอกสาร': 'Document toolbar', 'ล่าง': 'Bottom', 'บน': 'Top', 'ลอย': 'Float', 'ซ่อน': 'Hide',
+  'ซ่อนทั้งหมด': 'Hide all', 'แสดงทั้งหมด': 'Show all', 'คืนค่าเริ่มต้น': 'Reset', 'ตัวเลือกเครื่องมือ': 'Tool options', 'ภาพย่อหน้า': 'Thumbnails',
+  'ลากเพื่อย้าย': 'Drag to move', 'ยึดกลับด้านซ้าย': 'Dock to the left',
+  'ลากแถบหัวของหน้าต่างลอยเพื่อย้ายตำแหน่ง • คลิกขวาที่แถบเครื่องมือหรือภาพย่อเพื่อเปิดเมนูนี้': 'Drag a floating window by its title bar to move it • Right-click the tool bar or thumbnails to open this menu',
+  'หน้าจอขนาดเล็กจะใช้การจัดวางมาตรฐานชั่วคราว': 'Small screens temporarily use the standard layout',
+  'เปิดกลับได้จากปุ่ม "จัดวางเมนู" ที่แถบด้านบน': 'Bring it back with the "Layout" button in the top bar',
+  'ซ่อนเมนูทั้งหมดแล้ว — กด Ctrl+\\ อีกครั้งเพื่อแสดง': 'All menus hidden — press Ctrl+\\ again to show them', 'แสดงเมนูแล้ว': 'Menus shown',
+  'คืนค่าการจัดวางเริ่มต้นแล้ว': 'Layout reset to default',
   'บันทึกไว้ในคลังลายเซ็น': 'Save to signature library', 'จำไว้ในเครื่องนี้หลังปิดหน้า': 'Remember on this device after closing',
   'ค่าเริ่มต้น: ลายเซ็นจะถูกลบเมื่อปิดหน้านี้ หากเลือก "จำไว้ในเครื่องนี้" ผู้อื่นที่ใช้คอมพิวเตอร์และบัญชีเดียวกันอาจเห็นได้ — ไม่ควรใช้บนเครื่องส่วนกลาง': 'By default, signatures are deleted when you close this page. If you choose "Remember on this device", other people using the same computer and account may see them — avoid this on shared computers.',
   'ลบลายเซ็นทั้งหมด': 'Delete all signatures', 'ลบลายเซ็นทั้งหมด?': 'Delete all signatures?', 'ลบทั้งหมด': 'Delete all', 'ลบลายเซ็นทั้งหมดแล้ว': 'All signatures deleted',
@@ -2887,6 +3128,7 @@ function setLang(l) {
 $('#btnLang').onclick = () => setLang(I18N.lang === 'en' ? 'th' : 'en');
 
 renderSavedSigs(); syncProps(); renderList();
+applyLayout();
 setLang(I18N.lang);
 </script>
 </body>
