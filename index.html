@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-b7NkxCnDr1D59iFd+e/phiYDc369qLmaiLEt8nNUNCw=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-SgCagVClzjqdie9B3mPIfAKEZ2B36H0j7lvcQWFi0IA=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>CEM PDF Manager</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -311,7 +311,9 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 .src-tag, .grp-badge { position: absolute; top: 8px; left: 8px; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; z-index: 2; }
 .grp-badge { background: var(--grp, #888); }
 .sortable-ghost { opacity: .3; }
-.pcard.group-moving { opacity: .35; }
+.pcard.group-hidden { display: none; }
+/* หน้าที่ลากเป็นกลุ่ม: แสดงเป็นปึกกระดาษซ้อนกัน */
+.pcard.stacked .sheet { box-shadow: 5px 5px 0 -1px #fff, 5px 5px 0 0 var(--border-strong), 10px 10px 0 -1px #fff, 10px 10px 0 0 var(--border-strong), 0 8px 24px rgba(0,0,0,.25); }
 .pcard .drag-count { position: absolute; top: 2px; right: 2px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 600; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 3; pointer-events: none; }
 .sortable-chosen .sheet { box-shadow: 0 8px 24px rgba(0,0,0,.25); }
 
@@ -2108,6 +2110,19 @@ function pageCard(item, label, thumbFn) {
   return c;
 }
 let gridSortable = null;
+// FLIP animation: จำตำแหน่งการ์ดก่อนเปลี่ยน แล้วเลื่อนจากตำแหน่งเก่าไปตำแหน่งใหม่
+function cardRects() { const m = new Map(); $$('#pageGrid .pcard').forEach(c => { if (!c.classList.contains('group-hidden')) m.set(+c.dataset.id, c.getBoundingClientRect()); }); return m; }
+function flipCards(before) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  $$('#pageGrid .pcard').forEach(c => {
+    if (c.classList.contains('group-hidden') || c.classList.contains('sortable-ghost') || c.classList.contains('sortable-chosen')) return;
+    const r0 = before.get(+c.dataset.id); if (!r0) return; const r1 = c.getBoundingClientRect();
+    const dx = r0.left - r1.left, dy = r0.top - r1.top; if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    c.style.transition = 'none'; c.style.transform = `translate(${dx}px, ${dy}px)`; c.offsetWidth;
+    c.style.transition = 'transform .3s cubic-bezier(.2,.7,.2,1)'; c.style.transform = '';
+    c.addEventListener('transitionend', () => { c.style.transition = ''; }, { once: true });
+  });
+}
 function renderOrganize() {
   const grid = $('#pageGrid'); clearLazy(grid); grid.innerHTML = '';
   O.items.forEach((it, idx) => {
@@ -2121,8 +2136,14 @@ function renderOrganize() {
   gridSortable = new Sortable(grid, {
     animation: 160, filter: '.mini-btn', preventOnFilter: false, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
     // ลากหน้าที่อยู่ในกลุ่มที่เลือก (มากกว่า 1 หน้า) → ย้ายทั้งกลุ่มไปด้วยกัน โดยคงลำดับเดิมของกลุ่ม
-    onChoose: ev => { const id = +ev.item.dataset.id; if (O.selected.size > 1 && O.selected.has(id)) { ev.item.append(el('span', 'drag-count', String(O.selected.size))); $$('#pageGrid .pcard.selected').forEach(c => { if (c !== ev.item) c.classList.add('group-moving'); }); } },
-    onUnchoose: () => { $$('#pageGrid .drag-count').forEach(b => b.remove()); $$('#pageGrid .group-moving').forEach(c => c.classList.remove('group-moving')); },
+    onChoose: ev => { const id = +ev.item.dataset.id; if (O.selected.size > 1 && O.selected.has(id)) { ev.item.classList.add('stacked'); ev.item.append(el('span', 'drag-count', String(O.selected.size))); } },
+    // เริ่มลาก: หน้าอื่นในกลุ่มหายจากตำแหน่งเดิม (ยุบเข้าไปรวมกับหน้าที่ลาก) และหน้าที่เหลือเลื่อนปิดช่องว่างอย่างนุ่มนวล
+    onStart: ev => {
+      if (!ev.item.classList.contains('stacked')) return;
+      const others = $$('#pageGrid .pcard.selected').filter(c => c !== ev.item);
+      const before = cardRects(); others.forEach(c => c.classList.add('group-hidden')); flipCards(before);
+    },
+    onUnchoose: ev => { if (!ev.item.classList.contains('stacked') || !$('#pageGrid .group-hidden')) { $$('#pageGrid .drag-count').forEach(b => b.remove()); $$('#pageGrid .stacked').forEach(c => c.classList.remove('stacked')); } },
     onEnd: ev => {
       const id = +ev.item.dataset.id; const group = O.selected.size > 1 && O.selected.has(id);
       if (!group) {
@@ -2136,8 +2157,10 @@ function renderOrganize() {
       const at = domIds.slice(0, domIds.indexOf(id)).filter(x => !O.selected.has(x)).length;
       const next = [...rest.slice(0, at).map(x => byId.get(x)), ...moving, ...rest.slice(at).map(x => byId.get(x))];
       const same = next.every((it, k) => it === O.items[k]);
+      // ตำแหน่งก่อนวาด: หน้าในกลุ่มที่ซ่อนอยู่ เริ่มจากจุดที่วางหน้า แล้ว "กระจาย" ออกไปยังตำแหน่งใหม่
+      const before = cardRects(); const drop = ev.item.getBoundingClientRect(); moving.forEach(i => { if (!before.has(i.id) || i.id !== id) before.set(i.id, drop); });
       if (!same) { oSnap(); O.items = next; }
-      renderOrganize();
+      renderOrganize(); flipCards(before);
       if (!same) toast(`ย้าย ${moving.length} หน้าแล้ว`, 'success');
     },
   });
