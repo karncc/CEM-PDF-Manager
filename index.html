@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-809cKcq4A/nKso3qCPhF7yGvbM/an8LJz94bSRG+sp4=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-b7NkxCnDr1D59iFd+e/phiYDc369qLmaiLEt8nNUNCw=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>CEM PDF Manager</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -311,6 +311,8 @@ body.tool-organize .pcard:hover .pcard-actions { display: flex; }
 .src-tag, .grp-badge { position: absolute; top: 8px; left: 8px; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; z-index: 2; }
 .grp-badge { background: var(--grp, #888); }
 .sortable-ghost { opacity: .3; }
+.pcard.group-moving { opacity: .35; }
+.pcard .drag-count { position: absolute; top: 2px; right: 2px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 600; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 3; pointer-events: none; }
 .sortable-chosen .sheet { box-shadow: 0 8px 24px rgba(0,0,0,.25); }
 
 /* ======================= File list (combine / images) ======================= */
@@ -2118,7 +2120,26 @@ function renderOrganize() {
   if (gridSortable) gridSortable.destroy();
   gridSortable = new Sortable(grid, {
     animation: 160, filter: '.mini-btn', preventOnFilter: false, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
-    onEnd: ev => { if (ev.oldIndex === ev.newIndex) return; oSnap(); const [m] = O.items.splice(ev.oldIndex, 1); O.items.splice(ev.newIndex, 0, m); $$('#pageGrid .pcard-label').forEach((l, k) => l.textContent = k + 1); updateOrgStats(); },
+    // ลากหน้าที่อยู่ในกลุ่มที่เลือก (มากกว่า 1 หน้า) → ย้ายทั้งกลุ่มไปด้วยกัน โดยคงลำดับเดิมของกลุ่ม
+    onChoose: ev => { const id = +ev.item.dataset.id; if (O.selected.size > 1 && O.selected.has(id)) { ev.item.append(el('span', 'drag-count', String(O.selected.size))); $$('#pageGrid .pcard.selected').forEach(c => { if (c !== ev.item) c.classList.add('group-moving'); }); } },
+    onUnchoose: () => { $$('#pageGrid .drag-count').forEach(b => b.remove()); $$('#pageGrid .group-moving').forEach(c => c.classList.remove('group-moving')); },
+    onEnd: ev => {
+      const id = +ev.item.dataset.id; const group = O.selected.size > 1 && O.selected.has(id);
+      if (!group) {
+        if (ev.oldIndex === ev.newIndex) return;
+        oSnap(); const [m] = O.items.splice(ev.oldIndex, 1); O.items.splice(ev.newIndex, 0, m); $$('#pageGrid .pcard-label').forEach((l, k) => l.textContent = k + 1); updateOrgStats(); return;
+      }
+      const domIds = $$('#pageGrid .pcard').map(c => +c.dataset.id);
+      const byId = new Map(O.items.map(i => [i.id, i]));
+      const moving = O.items.filter(i => O.selected.has(i.id));
+      const rest = domIds.filter(x => !O.selected.has(x));
+      const at = domIds.slice(0, domIds.indexOf(id)).filter(x => !O.selected.has(x)).length;
+      const next = [...rest.slice(0, at).map(x => byId.get(x)), ...moving, ...rest.slice(at).map(x => byId.get(x))];
+      const same = next.every((it, k) => it === O.items[k]);
+      if (!same) { oSnap(); O.items = next; }
+      renderOrganize();
+      if (!same) toast(`ย้าย ${moving.length} หน้าแล้ว`, 'success');
+    },
   });
   updateOrgStats();
 }
@@ -2766,6 +2787,7 @@ const EN_RULES = [
   [/^อ่านไฟล์ (.+) ไม่ได้: ([\s\S]*)$/, (m, f, e) => `Could not read ${f}: ${tr(e)}`],
   [/^เก็บได้สูงสุด (\d+) แบบ — .*$/, (m, n) => `Up to ${n} signatures can be saved — the oldest one was removed`],
   [/^แทรก (\d+) หน้าแล้ว$/, (m, n) => `Inserted ${pl(n, 'page')}`],
+  [/^ย้าย (\d+) หน้าแล้ว$/, (m, n) => `Moved ${pl(n, 'page')}`],
   [/^แยก (\d+) หน้าเป็นไฟล์ใหม่แล้ว$/, (m, n) => `Extracted ${pl(n, 'page')} into a new file`],
   [/^แยกไฟล์สำเร็จ (\d+) ไฟล์$/, (m, n) => `Split into ${pl(n, 'file')}`],
   [/^ไม่รองรับไฟล์ (.+)$/, (m, f) => `Unsupported file: ${f}`],
