@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-J75eINnr9WsgbpXLoyhHYxMzGYam/K1FKqzkp7FE/n8=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xEq+xti/1M7HCBFSZTj69sCS7yOELAcSI9TU82j+ZUA=' 'sha256-hd/bNo7dP+a8VEaLk4mcmJF7dU46IFnMK+fhhRYhrOA=' https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data: blob:; img-src data: blob:; connect-src https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js data: blob:; worker-src blob:; frame-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>CEM PDF Manager</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -728,7 +728,7 @@ body[data-fbar="hidden"] .floatbar { display: none; }
       <div class="panel-sec" data-panel="combine">
         <div class="panel-head">
           <h2>รวมไฟล์ PDF</h2>
-          <p>เพิ่มไฟล์ตั้งแต่ 2 ไฟล์ขึ้นไป ลากการ์ดเพื่อเรียงลำดับ แล้วกด "รวมไฟล์"</p>
+          <p>เพิ่มไฟล์ตั้งแต่ 2 ไฟล์ขึ้นไป ลากการ์ดเพื่อเรียงลำดับ แล้วกด "รวมไฟล์และดาวน์โหลด"</p>
         </div>
         <div class="btn-stack" style="margin-top:0">
           <button class="btn btn-block" id="cmbAdd" data-icon="filePlus">เพิ่มไฟล์ PDF</button>
@@ -736,10 +736,11 @@ body[data-fbar="hidden"] .floatbar { display: none; }
         </div>
         <div class="summary" id="cmbSummary">ยังไม่มีไฟล์</div>
         <div class="btn-stack">
-          <button class="btn btn-primary btn-block" id="cmbRun" data-icon="layers">รวมไฟล์</button>
+          <button class="btn btn-primary btn-block" id="cmbRun" data-icon="download">รวมไฟล์และดาวน์โหลด</button>
+          <button class="btn btn-block" id="cmbOpen" data-icon="pen">รวมแล้วเปิดแก้ไขต่อ</button>
           <button class="btn btn-ghost btn-block" id="cmbClear">ล้างรายการ</button>
         </div>
-        <div class="note" data-en="The combined file opens so you can check it, keep editing, or click <b>Download</b> right away.">ไฟล์ที่รวมแล้วจะเปิดขึ้นมาให้ตรวจสอบ แก้ไขต่อ หรือกด <b>ดาวน์โหลด</b> ได้ทันที</div>
+        <div class="note" data-en="<b>Combine &amp; download</b> saves the combined file right away — the document you have open is not changed.<br><b>Combine &amp; keep editing</b> opens the combined file in place of the current document so you can sign or edit it.">ปุ่ม <b>รวมไฟล์และดาวน์โหลด</b> จะบันทึกไฟล์รวมทันที โดยไม่เปลี่ยนเอกสารที่เปิดอยู่<br>ปุ่ม <b>รวมแล้วเปิดแก้ไขต่อ</b> จะเปิดไฟล์รวมแทนเอกสารปัจจุบัน เพื่อลงนามหรือแก้ไขต่อ</div>
       </div>
 
       <!-- แปลงไฟล์ -->
@@ -764,7 +765,8 @@ body[data-fbar="hidden"] .floatbar { display: none; }
             <div class="field"><span>ระยะขอบ</span>
               <select class="input" id="imgMargin"><option value="0">ไม่มี</option><option value="18" selected>เล็ก</option><option value="40">ใหญ่</option></select>
             </div>
-            <button class="btn btn-primary btn-block" id="imgRun" data-icon="file">สร้าง PDF</button>
+            <button class="btn btn-primary btn-block" id="imgRun" data-icon="download">สร้าง PDF และดาวน์โหลด</button>
+            <button class="btn btn-block" id="imgOpen" data-icon="pen" style="margin-top:6px">สร้างแล้วเปิดแก้ไขต่อ</button>
             <button class="btn btn-ghost btn-block" id="imgClear" style="margin-top:6px">ล้างรายการ</button>
           </div>
         </div>
@@ -1036,6 +1038,7 @@ body[data-fbar="hidden"] .floatbar { display: none; }
 'use strict';
 const { PDFDocument, degrees, rgb } = PDFLib;
 /* ตัวประมวลผล PDF (worker) — ดาวน์โหลดแล้วตรวจลายนิ้วมือ (SRI) ก่อนใช้ หากไฟล์บน CDN ถูกแก้ไขจะไม่ยอมรัน */
+const C = { files: [] }, IMG = { items: [] };   // รายการไฟล์ที่จะรวม / รูปที่จะแปลง (ประกาศก่อน เพราะ updateChrome ใช้)
 const PDF_WORKER = { url: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js', integrity: 'sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2' };
 const workerReady = fetch(PDF_WORKER.url, { integrity: PDF_WORKER.integrity, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'force-cache' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
@@ -1329,7 +1332,10 @@ function updateChrome() {
   $('#docChip').classList.toggle('dirty', S.dirty);
   $('#btnUndo').disabled = !((S.tool === 'organize' && O.undo.length) || S.history.length);
   $('#btnRedo').disabled = !((S.tool === 'organize' && O.redo.length) || S.future.length);
-  $('#btnDownload').disabled = !has; $('#btnPrint').disabled = !has;
+  // ปุ่มดาวน์โหลด/พิมพ์ทำงานตามเครื่องมือที่เปิดอยู่ — หน้ารวมไฟล์/แปลงไฟล์ ไม่ดาวน์โหลดเอกสารที่เปิดค้างไว้
+  const dl = S.tool === 'combine' ? C.files.length >= 2 : S.tool === 'convert' ? IMG.items.length > 0 : has;
+  $('#btnDownload').disabled = !dl; $('#btnPrint').disabled = !has || ['combine', 'convert'].includes(S.tool);
+  $('#btnDownload').title = S.tool === 'combine' ? 'รวมไฟล์และดาวน์โหลด (Ctrl+S)' : S.tool === 'convert' ? 'สร้าง PDF จากรูปภาพและดาวน์โหลด (Ctrl+S)' : 'ดาวน์โหลด (Ctrl+S)';
   $('#pdf2imgBtn').disabled = !has; $('#pdf2imgNote').hidden = has;
   $('#cmbAddCurrent').disabled = !has;
 }
@@ -2215,6 +2221,8 @@ async function confirmPendingWork() {
   return true;
 }
 async function downloadDoc() {
+  if (S.tool === 'combine') return combineDownload();
+  if (S.tool === 'convert') return IMG.items.length ? imagesDownload() : toast('กรุณาเพิ่มรูปภาพก่อน', 'error');
   if (!S.doc) return; if (!(await confirmPendingWork())) return;
   await busy('กำลังเตรียมไฟล์...');
   try { download(await getOutputBytes(), ensurePdf(S.doc.name)); S.dirty = false; updateChrome(); toast('ดาวน์โหลดไฟล์แล้ว', 'success'); }
@@ -2222,7 +2230,7 @@ async function downloadDoc() {
   finally { unbusy(); }
 }
 async function printDoc() {
-  if (!S.doc) return; if (!(await confirmPendingWork())) return;
+  if (!S.doc || ['combine', 'convert'].includes(S.tool)) return; if (!(await confirmPendingWork())) return;
   await busy('กำลังเตรียมพิมพ์...');
   try {
     const url = URL.createObjectURL(new Blob([await getOutputBytes()], { type: 'application/pdf' }));
@@ -2574,7 +2582,6 @@ $('#splitRun').onclick = async () => {
 /* =============================================================
    รวมไฟล์ & รูปภาพ (มุมมองรายการไฟล์)
    ============================================================= */
-const C = { files: [] }, IMG = { items: [] };
 async function loadImageFile(file, maxDim = 4000) {
   if (file.size > LIMITS.imageMB * 1048576) throw new Error(`รูป ${file.name} มีขนาด ${fmtMB(file.size)} เกินขีดจำกัด ${LIMITS.imageMB} MB`);
   const url = URL.createObjectURL(file);
@@ -2626,7 +2633,8 @@ function renderList() {
     grid.append(c);
   });
   $('#cmbSummary').textContent = C.files.length ? `${C.files.length} ไฟล์ • รวม ${C.files.reduce((s, f) => s + f.pages, 0)} หน้า` : 'ยังไม่มีไฟล์';
-  $('#cmbRun').disabled = C.files.length < 2; $('#imgRun').disabled = !IMG.items.length;
+  $('#cmbRun').disabled = $('#cmbOpen').disabled = C.files.length < 2; $('#imgRun').disabled = $('#imgOpen').disabled = !IMG.items.length;
+  updateChrome();
 }
 new Sortable($('#fileGrid'), { animation: 160, filter: '.fcard-del', preventOnFilter: false, ghostClass: 'sortable-ghost', onEnd: ev => { const arr = S.tool === 'combine' ? C.files : IMG.items; const [m] = arr.splice(ev.oldIndex, 1); arr.splice(ev.newIndex, 0, m); renderList(); } });
 $('#fileGrid').addEventListener('click', e => {
@@ -2648,34 +2656,63 @@ $('#cmbAddCurrent').onclick = async () => {
   try { C.files.unshift({ id: uid(), name: S.doc.name, bytes: await getOutputBytes(), pages: S.doc.pages.length, thumb: await getThumb(0) }); } finally { unbusy(); }
   renderList();
 };
-$('#cmbRun').onclick = async () => {
+async function buildMerged() {
+  const out = await PDFDocument.create();
+  for (const [k, f] of C.files.entries()) { busyText(`กำลังรวมไฟล์ ${k + 1} / ${C.files.length}...`); const d = await PDFDocument.load(f.bytes, { ignoreEncryption: true }); (await out.copyPages(d, d.getPageIndices())).forEach(p => out.addPage(p)); }
+  return out.save();
+}
+async function buildImagesPdf() {
+  const d = await PDFDocument.create(); const size = $('#imgPageSize').value, orient = $('#imgOrient').value, margin = +$('#imgMargin').value;
+  for (const it of IMG.items) {
+    const bytes = dataURLtoBytes(it.src); const im = it.src.startsWith('data:image/png') ? await d.embedPng(bytes) : await d.embedJpg(bytes);
+    const iw = it.w * 0.75, ih = it.h * 0.75; let pw, ph;
+    if (size === 'fit') { pw = iw + margin * 2; ph = ih + margin * 2; }
+    else { [pw, ph] = size === 'a4' ? [595.28, 841.89] : [612, 792]; if (orient === 'landscape' || (orient === 'auto' && iw > ih)) [pw, ph] = [ph, pw]; }
+    const page = d.addPage([pw, ph]); const s = size === 'fit' ? 1 : Math.min((pw - margin * 2) / iw, (ph - margin * 2) / ih);
+    page.drawImage(im, { x: (pw - iw * s) / 2, y: (ph - ih * s) / 2, width: iw * s, height: ih * s });
+  }
+  return d.save();
+}
+// เปิดผลลัพธ์แทนเอกสารปัจจุบัน — ถ้าเอกสารเดิมมีการแก้ไขที่ยังไม่ได้ดาวน์โหลด ให้เลือกก่อน
+async function confirmReplaceDoc(what) {
+  if (!S.doc || !S.dirty) return true;
+  const r = await dialog({ title: 'แทนที่เอกสารที่เปิดอยู่?', message: `"${S.doc.name}" มีการแก้ไขที่ยังไม่ได้ดาวน์โหลด ${what}จะเปิดขึ้นมาแทน (กดเลิกทำเพื่อกลับไปเอกสารเดิมได้)`, buttons: [{ label: 'ยกเลิก', value: null }, { label: 'ดาวน์โหลดเอกสารเดิมก่อน', value: 'save' }, { label: 'เปิดแทน', value: 'open', primary: true }] });
+  if (!r) return false;
+  if (r === 'save') { await busy('กำลังเตรียมไฟล์...'); try { download(await getOutputBytes(), ensurePdf(S.doc.name)); S.dirty = false; } finally { unbusy(); } }
+  return true;
+}
+async function combineDownload() {
   if (C.files.length < 2) return toast('เลือกไฟล์อย่างน้อย 2 ไฟล์', 'error');
   await busy('กำลังรวมไฟล์...');
+  try { const bytes = await buildMerged(); download(bytes, 'merged_document.pdf'); toast(`รวม ${C.files.length} ไฟล์และดาวน์โหลดแล้ว`, 'success'); }
+  catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error', 5000); } finally { unbusy(); }
+}
+async function imagesDownload() {
+  if (!IMG.items.length) return toast('กรุณาเพิ่มรูปภาพก่อน', 'error');
+  await busy('กำลังสร้าง PDF...');
+  try { download(await buildImagesPdf(), 'images_converted.pdf'); toast('สร้าง PDF จากรูปภาพและดาวน์โหลดแล้ว', 'success'); }
+  catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error', 5000); } finally { unbusy(); }
+}
+$('#cmbRun').onclick = combineDownload;
+$('#imgRun').onclick = imagesDownload;
+$('#cmbOpen').onclick = async () => {
+  if (C.files.length < 2) return toast('เลือกไฟล์อย่างน้อย 2 ไฟล์', 'error');
+  if (!(await confirmReplaceDoc('ไฟล์รวม'))) return;
+  await busy('กำลังรวมไฟล์...');
   try {
-    const out = await PDFDocument.create();
-    for (const [k, f] of C.files.entries()) { busyText(`กำลังรวมไฟล์ ${k + 1} / ${C.files.length}...`); const d = await PDFDocument.load(f.bytes, { ignoreEncryption: true }); (await out.copyPages(d, d.getPageIndices())).forEach(p => out.addPage(p)); }
-    const bytes = await out.save(); const n = C.files.length;
+    const bytes = await buildMerged(); const n = C.files.length;
     if (S.doc) pushHistory();
     await setDocument(bytes, 'merged_document.pdf', { reset: !S.doc }); S.dirty = true; C.files = [];
     unbusy(); await switchTool('view');
     toast(`รวม ${n} ไฟล์ (${S.doc.pages.length} หน้า) แล้ว — กด "ดาวน์โหลด" เพื่อบันทึก`, 'success', 5000);
   } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error', 5000); } finally { unbusy(); }
 };
-
-$('#imgRun').onclick = async () => {
+$('#imgOpen').onclick = async () => {
   if (!IMG.items.length) return toast('กรุณาเพิ่มรูปภาพก่อน', 'error');
+  if (!(await confirmReplaceDoc('PDF จากรูปภาพ'))) return;
   await busy('กำลังสร้าง PDF...');
   try {
-    const d = await PDFDocument.create(); const size = $('#imgPageSize').value, orient = $('#imgOrient').value, margin = +$('#imgMargin').value;
-    for (const it of IMG.items) {
-      const bytes = dataURLtoBytes(it.src); const im = it.src.startsWith('data:image/png') ? await d.embedPng(bytes) : await d.embedJpg(bytes);
-      const iw = it.w * 0.75, ih = it.h * 0.75; let pw, ph;
-      if (size === 'fit') { pw = iw + margin * 2; ph = ih + margin * 2; }
-      else { [pw, ph] = size === 'a4' ? [595.28, 841.89] : [612, 792]; if (orient === 'landscape' || (orient === 'auto' && iw > ih)) [pw, ph] = [ph, pw]; }
-      const page = d.addPage([pw, ph]); const s = size === 'fit' ? 1 : Math.min((pw - margin * 2) / iw, (ph - margin * 2) / ih);
-      page.drawImage(im, { x: (pw - iw * s) / 2, y: (ph - ih * s) / 2, width: iw * s, height: ih * s });
-    }
-    const bytes = await d.save(); if (S.doc) pushHistory();
+    const bytes = await buildImagesPdf(); if (S.doc) pushHistory();
     await setDocument(bytes, 'images_converted.pdf', { reset: !S.doc }); S.dirty = true; IMG.items = [];
     unbusy(); await switchTool('view');
     toast('สร้าง PDF จากรูปภาพแล้ว — กด "ดาวน์โหลด" เพื่อบันทึก', 'success', 5000);
@@ -2899,6 +2936,11 @@ window.addEventListener('beforeunload', e => { if (S.doc && S.dirty) { e.prevent
    ============================================================= */
 const TH_RE = /[฀-๿]/;
 const EN = {
+  'รวมไฟล์และดาวน์โหลด': 'Combine & download', 'รวมแล้วเปิดแก้ไขต่อ': 'Combine & keep editing', 'สร้าง PDF และดาวน์โหลด': 'Create PDF & download', 'สร้างแล้วเปิดแก้ไขต่อ': 'Create & keep editing',
+  'เพิ่มไฟล์ตั้งแต่ 2 ไฟล์ขึ้นไป ลากการ์ดเพื่อเรียงลำดับ แล้วกด "รวมไฟล์และดาวน์โหลด"': 'Add 2 or more files, drag the cards to reorder, then click "Combine & download"',
+  'รวมไฟล์และดาวน์โหลด (Ctrl+S)': 'Combine & download (Ctrl+S)', 'สร้าง PDF จากรูปภาพและดาวน์โหลด (Ctrl+S)': 'Create PDF from images & download (Ctrl+S)',
+  'แทนที่เอกสารที่เปิดอยู่?': 'Replace the open document?', 'ดาวน์โหลดเอกสารเดิมก่อน': 'Download current first', 'เปิดแทน': 'Open anyway',
+  'สร้าง PDF จากรูปภาพและดาวน์โหลดแล้ว': 'PDF created from images and downloaded',
   'จัดวางเมนู': 'Layout', 'จัดวางแถบเครื่องมือ': 'Tool bar position', 'จัดวางแผงตัวเลือก': 'Options panel position', 'จัดวางภาพย่อหน้า': 'Thumbnails position','จัดวางเมนู (Ctrl+\\ ซ่อน/แสดงทั้งหมด)': 'Layout (Ctrl+\\ hide/show all)', 'แถบเครื่องมือ': 'Tool bar', 'แผงตัวเลือก': 'Options panel',
   'ภาพย่อหน้า (พรีวิว)': 'Page thumbnails', 'แถบควบคุมเอกสาร': 'Document toolbar', 'ล่าง': 'Bottom', 'บน': 'Top', 'ลอย': 'Float', 'ซ่อน': 'Hide',
   'ซ่อนทั้งหมด': 'Hide all', 'แสดงทั้งหมด': 'Show all', 'คืนค่าเริ่มต้น': 'Reset', 'ตัวเลือกเครื่องมือ': 'Tool options', 'ภาพย่อหน้า': 'Thumbnails',
@@ -3026,6 +3068,8 @@ const EN = {
 const ERR_PREFIX = { 'เปิดไฟล์ไม่สำเร็จ': 'Could not open file', 'บันทึกไม่สำเร็จ': 'Could not save', 'พิมพ์ไม่สำเร็จ': 'Could not print', 'หมุนไม่สำเร็จ': 'Could not rotate', 'สร้างลายเซ็นไม่สำเร็จ': 'Could not create signature', 'แก้ไขไม่สำเร็จ': 'Could not edit', 'เกิดข้อผิดพลาด': 'Error' };
 const pl = (n, w) => `${n} ${w}${+n === 1 ? '' : 's'}`;
 const EN_RULES = [
+  [/^"(.+)" มีการแก้ไขที่ยังไม่ได้ดาวน์โหลด (ไฟล์รวม|PDF จากรูปภาพ)จะเปิดขึ้นมาแทน \(กดเลิกทำเพื่อกลับไปเอกสารเดิมได้\)$/, (m, f, w) => `"${f}" has changes that haven't been downloaded. The ${w === 'ไฟล์รวม' ? 'combined file' : 'PDF from images'} will open in its place (use Undo to go back).`],
+  [/^รวม (\d+) ไฟล์และดาวน์โหลดแล้ว$/, (m, n) => `Combined ${pl(n, 'file')} and downloaded`],
   [/^ไฟล์ (.+) มีขนาด ([\d.]+ MB) เกินขีดจำกัด (\d+) MB$/, (m, f, a, b) => `${f} is ${a}, over the ${b} MB limit`],
   [/^ไฟล์ (.+) มีขนาด ([\d.]+ MB) อาจทำงานช้าหรือใช้หน่วยความจำสูง ต้องการเปิดต่อหรือไม่\?$/, (m, f, a) => `${f} is ${a}. It may be slow or use a lot of memory. Open it anyway?`],
   [/^ไฟล์ (.+) มี (\d+) หน้า เกินขีดจำกัด (\d+) หน้า$/, (m, f, a, b) => `${f} has ${a} pages, over the ${b}-page limit`],
